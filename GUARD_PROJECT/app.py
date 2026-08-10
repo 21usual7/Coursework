@@ -1,7 +1,7 @@
+from flask import Flask
 
-#мне надо востановить ключ зная, какой plaitext and ciphertext. data = мой водд, он должен быть hex and len=5, 
+app = Flask(__name__)
 
-
-cipher_text = "d3418cf49e"
-cipher_text = bytes.fromhex(cipher_text)
-print(cipher_text)
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
