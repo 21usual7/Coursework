@@ -21,6 +21,11 @@ def extract_features(url: str) -> list:
     cerificate_val = check_for_certificate(url)
     
     features.append(cerificate_val) if cerificate_val is not None else f"Certificate is None {exit(-1)}"
+    redirects_count = count_redirects(url)
+    
+    if redirects_count == -1: 
+        raise ValueError("Redirect count check failed ")
+    features.append(redirects_count)
     
     return features
     
@@ -33,8 +38,8 @@ def is_ip(url):
 
 
 def check_for_certificate(url):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    parsed_url = parsed_url(url)
+    ''''''
+    parsed_url = urlparse(url)
     host = parsed_url.hostname
     port = parsed_url.port or 443
     context = ssl.create_default_context()
@@ -43,13 +48,26 @@ def check_for_certificate(url):
         with socket.create_connection((host, port), timeout=5) as s: 
             with context.wrap_socket(s, server_hostname=host) as ssock:
                 certificate = ssock.getpeercert()
-                
                 return 1 
 
     except ssl.SSLError as e:
         return 0
-    
     except Exception as e:
         print(f"Помилка підключення {e}")
         return None
+
+
+def count_redirects(url):
+    ''''''
+    try:
+        r = requests.get(url)
+        redirect_count = len(r.history)
+        return redirect_count
     
+    except Exception as e:
+        print(f"Помилка: {e}")
+        return -1
+    
+    
+
+#print(extract_features("https://google.com"))
