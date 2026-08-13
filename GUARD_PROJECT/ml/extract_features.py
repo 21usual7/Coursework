@@ -23,14 +23,7 @@ def extract_features(url: str) -> list:
     features.append(len(url))
     features.append(1) if "https://" in url else features.append(0)
     features.append(is_ip(url))
-    cerificate_val = check_for_certificate(url)
-    
-    features.append(cerificate_val) 
-    redirects_count = count_redirects(url)
-    
-    if redirects_count == -1: 
-        raise ValueError("Redirect count check failed ")
-    features.append(redirects_count)
+
     
     features.extend(extract_specific_symbols(url=url, domain=domain))
     features.extend(extract_entropy_features(url=url))
@@ -45,43 +38,6 @@ def is_ip(url: str) -> int:
     return 1 if match else 0     
 
 
-def check_for_certificate(url: str) -> int:
-
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url
-    try:
-        parsed_url = urlparse(url)
-        host = parsed_url.hostname
-        
-        if not host:
-            return -1
-
-        port = parsed_url.port or 443
-        context = ssl.create_default_context()
-
-        with socket.create_connection((host, port), timeout=1.5) as s: 
-            with context.wrap_socket(s, server_hostname=host) as ssock:
-                certificate = ssock.getpeercert()
-                return 1 if certificate else 0 
-
-    except ssl.SSLError:
-        return 0
-    except (socket.timeout, TimeoutError, OSError):
-        return -1
-    except Exception:
-        return -1
-
-
-def count_redirects(url: str) -> int:
-    '''Функція яка рахує кількість редіректів'''
-    try:
-        r = requests.get(url)
-        redirect_count = len(r.history)
-        return redirect_count
-    
-    except Exception as e:
-        print(f"Помилка: {e}")
-        return -1
     
 
 def extract_specific_symbols(url: str, domain: str) -> list:
