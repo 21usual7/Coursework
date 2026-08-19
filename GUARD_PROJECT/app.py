@@ -1,59 +1,83 @@
 import sys
 from pathlib import Path
-from database import close_db, get_all_users
+from database import close_db, add_user, get_user, check_username
+from werkzeug.security import generate_password_hash
+
 BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 import joblib
 import pandas as pd
-from flask import Flask
+from flask import Flask, redirect, request, url_for, session
 from ml.extract_features import extract_features
-
-
-app = Flask(__name__)
-
-
-app.teardown_appcontext(close_db)
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
 
 mod = joblib.load(BASE_DIR / "coursework.pkl")
 
 
-def check_url(url):
-    features = extract_features(url)
-    X_new = pd.DataFrame([features])
 
-    prediction = mod.predict(X_new)[0]  
+#Ініцілізація FLASK
+app = Flask(__name__)
 
-    classes = list(mod.classes_)
-    malicious_idx = classes.index('malicious') if 'malicious' in classes else 1
-
-    probabilities = mod.predict_proba(X_new)[0]
-    phishing_prob = probabilities[malicious_idx]
-
-    return prediction, phishing_prob
+app.teardown_appcontext(close_db)
+app.secret_key = open('key').read()
 
 
-@app.route('/register', ['GET', 'POST'])
+@app.route("/")
+def index():
+    user = session.get('username')    
+    return f"""<p>Hello, {user}
+    You have loggin in your profile 
+    </p>"""
+
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    pass
+    if request.method == 'GET':
+        return f"""INFORMATION"""
+    
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    session['username'] = username
+    res = check_username()
+    
+    if res is None:
+        return f"User arleady exists!"
+    
+    elif all([username, password, email]):
+        hashed_password = generate_password_hash(password=password)
+        add_user(username=username, password=hashed_password, email=email)
+        return redirect(url_for("/"))
+    
+    return "Заполните все поля!", 400
 
 
-@app.route('login', ['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return f"""RENDER Template"""
+    
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    hashed_password = generate_password_hash(password=password)
+    user = get_user(email=email, password=hashed_password)
 
+    if user:
+        session['username'] = username
+        session['user_id'] = user['user_id']
+        
+        return redirect(url_for("/"))
 
+    return "Неверное имя пользователя или пароль", 401
+
+ 
+
+    
     
 
 if __name__ == "__main__":
-    test_url = input("Введіть URL: ")
-    verdict, prob = check_url(test_url)
-
-    if verdict in ['malicious', 1]:
-        print(f"🚨 Фішинг з ймовірністю {prob * 100:.1f}%")
-    else:
-        print(f"✅ Безпечно з ймовірністю {(1 - prob) * 100:.1f}%")
+    app.run(debug=True)
