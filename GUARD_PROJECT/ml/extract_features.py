@@ -38,8 +38,6 @@ def is_ip(url: str) -> int:
     return 1 if match else 0     
 
 
-    
-
 def extract_specific_symbols(url: str, domain: str) -> list:
     """Функція яка приймає аргументи (url: str, domain: str) и повертає symbols_features list"""
     symbols_features = []
