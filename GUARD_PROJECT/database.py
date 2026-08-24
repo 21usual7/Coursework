@@ -71,6 +71,12 @@ def get_user(email: str, hashed_password: str) -> bool:
     )
     user = cursor.fetchone()
     return user 
+
+def delete_user_from_db(username: str):
+    db = get_db()
+    db.execute('DELETE FROM users WHERE username = like ? ', username) #TODO
+    
+    return "USER HAD BENN DELETED [200]" 
     
     
 if __name__ == '__main__':

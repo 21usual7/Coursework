@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from database import close_db, add_user, get_user, check_username
+from database import close_db, add_user, get_user, check_username, delete_user_from_db
 from werkzeug.security import generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -74,9 +74,31 @@ def login():
 
     return "Неверное имя пользователя или пароль", 401
 
- 
 
+@app.route("/delete/usr", methods=['GET', 'POST'])
+def deelt() -> int: 
+    if request.methods == "GET":
+        return f"some_string"
+    username = request.form.get('username')
+    if session.get('username') == username:
+        return delete_user_from_db(username=username)
+    return f"U haven't login as {username}" 
     
+    
+@app.route("/api/scan", methods=['GET', 'POST']) #TODO
+async def check_url(data: str):
+    features = extract_features(data.url)
+    X_new = pd.DataFrame([features])
+
+    prediction = mod.predict(X_new)[0]  
+
+    classes = list(mod.classes_)
+    malicious_idx = classes.index('malicious') if 'malicious' in classes else 1
+
+    probabilities = mod.predict_proba(X_new)[0]
+    phishing_prob = probabilities[malicious_idx]
+
+    return prediction, phishing_prob
     
 
 if __name__ == "__main__":
