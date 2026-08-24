@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from database import close_db, add_user, get_user, check_username, delete_user_from_db
+from database import close_db, add_user, get_user, check_username, delete_user_from_db, get_email
 from werkzeug.security import generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -76,15 +76,22 @@ def login():
 
 
 @app.route("/delete/usr", methods=['GET', 'POST'])
-def deelt() -> int: 
+def delete_user() -> int: 
     if request.methods == "GET":
         return f"some_string"
     username = request.form.get('username')
+    hashed_password = generate_password_hash(password=password)
+    email = get_email(username=username, hashed_password=hashed_password) #get email 
     if session.get('username') == username:
-        return delete_user_from_db(username=username)
+        return delete_user_from_db(email=email)
     return f"U haven't login as {username}" 
-    
-    
+
+
+@app.route("/modify-url", methods=['GET', 'POST'])
+def modify_urls():
+    pass    
+
+
 @app.route("/api/scan", methods=['GET', 'POST']) #TODO
 async def check_url(data: str):
     features = extract_features(data.url)

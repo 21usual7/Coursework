@@ -64,7 +64,6 @@ def check_username(username: str) -> bool:
 
 def get_user(email: str, hashed_password: str) -> bool:
     db = get_db()
-    result = db.execute('SELECT * FROM users WHERE (username, password) LIKE values (?, ?)', (email, hashed_password))
     cursor = db.execute(
         'SELECT * FROM users WHERE email = ? AND password = ?', 
         (email, hashed_password)
@@ -72,12 +71,20 @@ def get_user(email: str, hashed_password: str) -> bool:
     user = cursor.fetchone()
     return user 
 
-def delete_user_from_db(username: str):
+
+def delete_user_from_db(email: str):
     db = get_db()
-    db.execute('DELETE FROM users WHERE username = like ? ', username) #TODO
+    db.execute('DELETE FROM users WHERE username = like ? ', email) #TODO
     
     return "USER HAD BENN DELETED [200]" 
+
+def get_email(username: str, hashed_password: str):
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE username = ? AND password = ?', username, hashed_password)
     
-    
+    if user:
+        return user['email']
+    return "Couldn't find username"  
+  
 if __name__ == '__main__':
     init_db()

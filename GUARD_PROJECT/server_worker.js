@@ -6,7 +6,7 @@ async function sendUrl(url) {
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/scan', {
+        const response = await fetch('http://GUARD/api/scan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
