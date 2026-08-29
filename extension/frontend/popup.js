@@ -4,12 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnText = button.querySelector(".btn-text");
 
     chrome.storage.local.get({isEnabled : true}, (result) => {
-        updateUI(isEnabled);
+        updateUI(result.isEnabled);
     });
 
     button.addEventListener("click", () => {
         chrome.storage.local.get({isEnabled : true}, (result) => {
-            const newState = !currentState;
+            const newState = !result.isEnabled;
 
             chrome.storage.local.set({isEnabled: newState}, () => {
                 updateUI(newState);
