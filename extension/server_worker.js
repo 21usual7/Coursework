@@ -1,12 +1,12 @@
 // Функція відправки посилання на webserver
-async function sendUrl(url) {
+async function sendUrlToBackend(url) {
     // Ігнорування службових сторінок браузера
     if (!url || url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:')) {
         return;
     }
 
     try {
-        const response = await fetch('http://GUARD/api/scan', {
+        const response = await fetch('http://guardai/api/scan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
