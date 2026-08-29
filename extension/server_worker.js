@@ -15,6 +15,8 @@ async function sendUrlToBackend(url) {
         });
         const data = await response.json();
         console.log(`Проскановано URL ${url}`, data);
+        return data;
+        }
     } catch (error){
         console.error(`Помилка відправки на webserver`, error);
     }
@@ -23,6 +25,20 @@ async function sendUrlToBackend(url) {
 // Відстеження зміни URL у всіх вкладках браузера
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url) {
-        sendUrlToBackend(changeInfo.url);
+        data = sendUrlToBackend(changeInfo.url);
+    if (data){
+        try {
+            await chrome.tabs.sendMessage(tabId){
+                message: data
+            });
+        catch (error){
+        console.log("Не зміг відправити данні на content ")
+
+}
+    else {
+    console.log("APP повернув пусті данні!")
+}
+        }
+        }
     }
 });
