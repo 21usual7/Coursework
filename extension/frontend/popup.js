@@ -3,18 +3,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const button = document.getElementById("button");
     const btnText = button.querySelector(".btn-text");
 
-    chrome.storage.local.get(["isEnabled"], (result) => {
-        const isEnabled = result.isEnabled !== undefined ? result.isEnabled : true;
+    chrome.storage.local.get({isEnabled : true}, (result) => {
         updateUI(isEnabled);
     });
 
     button.addEventListener("click", () => {
-        chrome.storage.local.get(["isEnabled"], (result) => {
-            const currentState = result.isEnabled !== undefined ? result.isEnabled : true;
+        chrome.storage.local.get({isEnabled : true}, (result) => {
             const newState = !currentState;
 
             chrome.storage.local.set({isEnabled: newState}, () => {
-                updateUI.newState;
+                updateUI(newState);
             });
         });
     });
