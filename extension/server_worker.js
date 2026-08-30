@@ -30,13 +30,15 @@ chrome.runtime.onMessage((message, sender, sendResponse){
         const tabID = sender.tab?.id;
             if (url){
                 try {
-                    await chrome.tabs.sendMessage(tabId){
+                    const data = await chrome.tabs.sendMessage(tabId){
                         message: url;
                     });
                 catch (error){
                     console.log("Не зміг відправити данні на content ");
 
                 }
+                const isPhishingInt = Math.Trunc(parse(data))
+                blockUrl(1, url, isPhishingInt)
                 else {
                     console.log("APP повернув пусті данні!");
                 }
@@ -47,3 +49,33 @@ chrome.runtime.onMessage((message, sender, sendResponse){
     });
 }
 });
+
+
+@param {number} ruleId;
+@param {string} exactUrl
+async function blockUrl(ruleId, exactUrl, probabilityIsPhising){
+    const strictFilter = `|${exactUrl}|`;
+    const rule = {
+        id: ruleId,
+        priority: 1,
+        action: {
+        type: "block"
+        },
+        condition: {
+        urlFilter: staticFilter,
+        resourceTypes: ["main_frame", "sub_frame", "script", "xmlhttprequest", "image"]
+        }
+    };
+    if (probabilityIsPhising > 50){
+        await chrome.declarativeNetRequest.updateDynamicRules({
+            removeRuleIds: [ruleId],
+            addRules: [rule]
+    }
+  });
+}
+
+function parse(string){
+    const pattern = \d+(?:\.\d+)?(?=%);
+    return string.match(pattern);
+}
+
