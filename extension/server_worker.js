@@ -37,8 +37,14 @@ chrome.runtime.onMessage((message, sender, sendResponse){
                     console.log("Не зміг відправити данні на content ");
 
                 }
-                const isPhishingInt = Math.Trunc(parse(data))
-                blockUrl(1, url, isPhishingInt)
+                const isPhishingInt = Math.Trunc(parse(data));
+                blockUrl(1, url, isPhishingInt);
+                try{
+                    chrome.tabs.sendMessage(tabId, {"Url have been blocked"});
+                }
+                catch(e){
+                    console.log("Не зміг відправити повідомлення");
+                }
                 else {
                     console.log("APP повернув пусті данні!");
                 }
