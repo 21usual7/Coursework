@@ -7,8 +7,11 @@
         "default_popup" : "popup.html",
         "defuilt_icon" : "guard_icon",
     }
+    "permissions": [
+    "tabs"
+  ],
     "background" : {
-    "server_worker" : "../server_worker.js",
+    "server_worker" : "server_worker.js",
 }
     "content_scripts" : {
                 "matches" : "[*://*/*]",

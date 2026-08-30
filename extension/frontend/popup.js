@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chrome.storage.local.get({isEnabled : true}, (result) => {
             const newState = !result.isEnabled;
 
-            chrome.storage.local.set({isEnabled: newState}, () => {
+            await chrome.storage.local.set({isEnabled: newState}, () => {
                 updateUI(newState);
             });
         });
