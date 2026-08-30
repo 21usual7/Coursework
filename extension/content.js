@@ -10,9 +10,11 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 function toggleExtensionWork(isEnabled){
     if(IsEnabled){
-         chrome.runtime.sendMessage({action : "STATE Changed", enabled=true});
+        chrome.runtime.sendMessage({action : "STATE Changed", enabled : true});
+        handleWorkerResponse()
     }
     else{
-        chrome.runtime.sendMessage({action: "STATE Changed", enabled=false});
+        chrome.runtime.sendMessage({action: "STATE Changed", enabled : false});
     }
 }
+

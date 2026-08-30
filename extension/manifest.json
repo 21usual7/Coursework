@@ -8,7 +8,12 @@
         "defuilt_icon" : "guard_icon",
     }
     "permissions": [
-    "tabs"
+    "tabs",
+    "declarativeNetRequest",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
     "background" : {
     "server_worker" : "server_worker.js",
