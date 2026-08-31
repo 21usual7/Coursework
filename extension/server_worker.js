@@ -30,14 +30,13 @@ chrome.runtime.onMessage((message, sender, sendResponse){
         const tabID = sender.tab?.id;
             if (url){
                 try {
-                    const data = await chrome.tabs.sendMessage(tabId){
-                        message: url;
-                    });
+                    const data = JSON.parse(sendUrlToBackend(url))
                 catch (error){
                     console.log("Не зміг відправити данні на content ");
 
                 }
-                const isPhishingInt = Math.Trunc(parse(data));
+
+                const isPhishingInt = Math.Trunc(parse());
                 blockUrl(1, url, isPhishingInt);
                 try{
                     chrome.tabs.sendMessage(tabId, {"Url have been blocked"});
