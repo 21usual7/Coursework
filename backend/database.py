@@ -78,13 +78,19 @@ def delete_user_from_db(email: str):
     
     return "USER HAD BENN DELETED [200]" 
 
-def get_email(username: str, hashed_password: str):
+def add_link(link : str, user_id: str, status: str) ->: 
     db = get_db()
-    user = db.execute('SELECT * FROM users WHERE username = ? AND password = ?', username, hashed_password)
-    
-    if user:
-        return user['email']
-    return "Couldn't find username"  
-  
+    db.execute('INSERT INTO links (user_id, url, blocked) VALUES (?, ?, ?) ', (user_id, link, status))
+
+    return "Link was added to database"
+
+
+def change_status(user_id: str, blocked: str):
+    db = get_db()
+    db.execute('UPDATE links SET blocked = ? WHERE usser_id = like ?  ', (blocked, user_id))
+
+    return "Link status has benn updated"
+
+
 if __name__ == '__main__':
     init_db()
