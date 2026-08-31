@@ -2,7 +2,7 @@
 async function sendUrlToBackend(url) {
     // Ігнорування службових сторінок браузера
     if (!url || url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:')) {
-        return;
+        return null;
     }
 
     try {
@@ -11,76 +11,75 @@ async function sendUrlToBackend(url) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({url: url})
+            body: JSON.stringify({ url: url })
         });
         const data = await response.json();
         console.log(`Проскановано URL ${url}`, data);
         return data;
-        }
-    } catch (error){
+    } catch (error) {
         console.error(`Помилка відправки на webserver`, error);
+        return null;
     }
+}
+
+function parse(string) {
+    if (!string) return 0;
+    const pattern = /\d+(?:\.\d+)?(?=%)/;
+    const match = String(string).match(pattern);
+    return match ? parseFloat(match[0]) : 0;
 }
 
 // Відстеження зміни URL у всіх вкладках браузера
-chrome.runtime.onMessage((message, sender, sendResponse){
-    if (message.action == "STATE Changed" && message.enabled){
-        if (message) {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+    if (message.action === "STATE Changed" && message.enabled) {
         const url = sender.tab?.url;
-        const tabID = sender.tab?.id;
-            if (url){
-                try {
-                    const data = JSON.parse(sendUrlToBackend(url))
-                catch (error){
-                    console.log("Не зміг відправити данні на content ");
+        const tabId = sender.tab?.id;
+        if (url) {
+            const data = await sendUrlToBackend(url);
+            if (data && data.probability) {
+                const probability = parse(data.probability);
+                const isPhishingInt = Math.trunc(probability);
 
-                }
+                await blockUrl(1, url, isPhishingInt);
 
-                const isPhishingInt = Math.Trunc(parse());
-                blockUrl(1, url, isPhishingInt);
-                try{
-                    chrome.tabs.sendMessage(tabId, {"Url have been blocked"});
+                if (tabId) {
+                    try {
+                        await chrome.tabs.sendMessage(tabId, { action: "URL_BLOCKED", message: "Url have been blocked" });
+                    } catch (e) {
+                        console.log("Не зміг відправити повідомлення на вкладку", e);
+                    }
                 }
-                catch(e){
-                    console.log("Не зміг відправити повідомлення");
-                }
-                else {
-                    console.log("APP повернув пусті данні!");
-                }
+            } else {
+                console.log("APP повернув пусті данні або помилку!");
             }
-
         }
     }
-    });
-}
 });
 
+/**
+ * @param {number} ruleId
+ * @param {string} exactUrl
+ * @param {number} probabilityIsPhishing
+ */
 
-@param {number} ruleId;
-@param {string} exactUrl
-async function blockUrl(ruleId, exactUrl, probabilityIsPhising){
+async function blockUrl(ruleId, exactUrl, probabilityIsPhishing) {
     const strictFilter = `|${exactUrl}|`;
     const rule = {
         id: ruleId,
         priority: 1,
         action: {
-        type: "block"
+            type: "block"
         },
         condition: {
-        urlFilter: staticFilter,
-        resourceTypes: ["main_frame", "sub_frame", "script", "xmlhttprequest", "image"]
+            urlFilter: strictFilter,
+            resourceTypes: ["main_frame", "sub_frame", "script", "xmlhttprequest", "image"]
         }
     };
-    if (probabilityIsPhising > 50){
+
+    if (probabilityIsPhishing > 50) {
         await chrome.declarativeNetRequest.updateDynamicRules({
             removeRuleIds: [ruleId],
             addRules: [rule]
+        });
     }
-  });
 }
-
-function parse(string){
-    const pattern = \d+(?:\.\d+)?(?=%);
-    return string.match(pattern);
-}
-
