@@ -6,8 +6,6 @@ model = joblib.load("ml/coursework.pkl")
 
 
 def check_url(url):
-
-    # перевірка, чи завантажилась модель
     if model is None:
         raise RuntimeError("Модель не завантажена")
 

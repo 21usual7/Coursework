@@ -49,7 +49,7 @@ def init_db():
     print("БД та таблиця створені!")
 
 
-def add_user(username: str, hashed_password: str, email: str) -> None:
+def add_user(username: str, hashed_password: str, email: str) -> str:
     db = get_db()  
     db.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', (username, hashed_password, email))
     db.commit()    
@@ -74,7 +74,7 @@ def get_user(email: str, hashed_password: str) -> bool:
     return user 
 
 
-def delete_user_from_db(email: str):
+def delete_user_from_db(email: str) ->: str:
     db = get_db()
     db.execute('DELETE FROM users WHERE username = like ? ', email) #TODO
     db.commit()    
