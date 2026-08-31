@@ -78,17 +78,17 @@ def delete_user_from_db(email: str):
     
     return "USER HAD BENN DELETED [200]" 
 
-def add_link(link : str, user_id: str, status: str) ->: 
+def add_link(link : str, user_id: str, status: str) -> str: 
     db = get_db()
     db.execute('INSERT INTO links (user_id, url, blocked) VALUES (?, ?, ?) ', (user_id, link, status))
-
+    db.commit()
     return "Link was added to database"
 
 
-def change_status(user_id: str, blocked: str):
+def change_status(user_id: str, blocked: str) -> str:
     db = get_db()
-    db.execute('UPDATE links SET blocked = ? WHERE usser_id = like ?  ', (blocked, user_id))
-
+    db.execute('UPDATE links SET blocked = ? WHERE user_id = ?  ', (blocked, user_id))
+    db.commit()
     return "Link status has benn updated"
 
 
