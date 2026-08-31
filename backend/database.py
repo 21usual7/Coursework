@@ -93,7 +93,7 @@ def change_status(user_id: str, blocked: str) -> str:
     db = get_db()
     db.execute('UPDATE links SET blocked = ? WHERE user_id = ?  ', (blocked, user_id))
     db.commit()
-    return "Link status has benn updated"
+    return "Link status has been updated"
 
 
 if __name__ == '__main__':
