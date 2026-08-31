@@ -1,6 +1,7 @@
 import sqlite3
 from flask import g
 
+
 DATABASE = 'my_database.db'
 
 
@@ -52,9 +53,10 @@ def add_user(username: str, hashed_password: str, email: str) -> None:
     db = get_db()  
     db.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', (username, hashed_password, email))
     db.commit()    
+
+    return 'User have been added to DATABASE'
+
     
-
-
 def check_username(username: str) -> bool:
     db = get_db()
     result = db.execute('SELECT * FROM users WHERE username LIKE VALUES ?', (username,)).fetchone()
@@ -75,16 +77,18 @@ def get_user(email: str, hashed_password: str) -> bool:
 def delete_user_from_db(email: str):
     db = get_db()
     db.execute('DELETE FROM users WHERE username = like ? ', email) #TODO
-    
+    db.commit()    
     return "USER HAD BENN DELETED [200]" 
 
+
+#Добавляе до таблиці URL та його статус
 def add_link(link : str, user_id: str, status: str) -> str: 
     db = get_db()
     db.execute('INSERT INTO links (user_id, url, blocked) VALUES (?, ?, ?) ', (user_id, link, status))
     db.commit()
     return "Link was added to database"
 
-
+#Обновлює статус URL.
 def change_status(user_id: str, blocked: str) -> str:
     db = get_db()
     db.execute('UPDATE links SET blocked = ? WHERE user_id = ?  ', (blocked, user_id))
