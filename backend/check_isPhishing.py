@@ -1,9 +1,13 @@
 import joblib
+import os
 from flask import request
 from ml.extract_features import extract_features
 
-model = joblib.load("ml/coursework.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+MODEL_PATH = os.path.join(BASE_DIR, "ml", "coursework.pkl")
+
+model = joblib.load(MODEL_PATH)
 
 def check_url(url):
     if model is None:

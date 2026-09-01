@@ -2,7 +2,7 @@
 при переході по посиланню, якщо програма вважає, що посилання фішингове, дві кнопки: 
 "повренутися назад", "продовжити" */
 
-/* Базовый сброс и минимальные настройки */
+/* Базові налаштування */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -10,7 +10,7 @@
     font-family: sans-serif;
 }
 
-/* Белый фон для popup и страницы блокировки */
+/* Білий фон */
 body {
     background-color: #ffffff;
     color: #000000;
@@ -21,13 +21,13 @@ body {
     justify-content: center;
 }
 
-/* Настройки ширины под всплывающее окно popup */
+/* Налаштування ширини під вспливаюче вікно */
 body.popup-body {
     width: 200px;
     padding: 10px;
 }
 
-/* Страница блокировки во весь экран */
+/* Сторінка блокування */
 body.blocked-body {
     min-height: 100vh;
 }
@@ -41,7 +41,7 @@ body.blocked-body {
     gap: 10px;
 }
 
-/* Общий стиль для всех 3 кнопок */
+/* Загальній стиль для 3 кнопок */
 .btn {
     width: 100%;
     padding: 10px 16px;
@@ -57,27 +57,27 @@ body.blocked-body {
     background-color: #e0e0e0;
 }
 
-/* 1. Кнопка "Увімкнути / Вимкнути" (Popup) */
+/* 1. Кнопка "Увімкнути / Вимкнути" */
 .btn-toggle.active {
-    background-color: #22c55e; /* Зеленый при включении */
+    background-color: #22c55e;
     color: #ffffff;
     border: none;
 }
 
 .btn-toggle.off {
-    background-color: #ef4444; /* Красный при выключении */
+    background-color: #ef4444;
     color: #ffffff;
     border: none;
 }
 
-/* 2. Кнопка "Повернутися назад" (Blocked page) */
+/* 2. Кнопка "Повернутися назад" */
 .btn-safe {
-    background-color: #2563eb; /* Синяя главная кнопка */
+    background-color: #2563eb;
     color: #ffffff;
     border: none;
 }
 
-/* 3. Кнопка "Продовжити" (Blocked page) */
+/* 3. Кнопка "Продовжити" */
 .btn-danger {
     background-color: transparent;
     border: 1px solid #999;

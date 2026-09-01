@@ -74,7 +74,7 @@ def get_user(email: str, hashed_password: str) -> bool:
     return user 
 
 
-def delete_user_from_db(email: str) ->: str:
+def delete_user_from_db(email: str) -> str:
     db = get_db()
     db.execute('DELETE FROM users WHERE username = like ? ', email) #TODO
     db.commit()    

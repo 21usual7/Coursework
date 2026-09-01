@@ -1,7 +1,7 @@
 import joblib
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from backend.check_isPhishing import check_url
+from check_isPhishing import check_url
 from database import get_db, add_link, change_status
 # сервер, который запущениый, обрабатывае т и принмает запросы от сервер воркер. 
 # достает из них юрл ссылку, вызвает спец функцию, которая запускает можель и возвращает ответ
