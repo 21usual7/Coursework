@@ -1,30 +1,32 @@
-// керує інтерфейсом вспливаючого вікна (кнопка вкл/вкл, збереження налаштувань).
-document.addEventListener("DOMContentLoaded", () => {
+// Керує інтерфейсом спливаючого вікна (кнопка увімк/вимк, збереження налаштувань)
+console.log("HELLO WORLD!")
+document.addEventListener("DOMContentLoaded", async () => {
     const button = document.getElementById("button");
     const btnText = button.querySelector(".btn-text");
 
-    chrome.storage.local.get({isEnabled : true}, (result) => {
-        updateUI(result.isEnabled);
+    // Початкове завантаження стану
+    const result = await chrome.storage.local.get({ isEnabled: true });
+    updateUI(result.isEnabled);
+
+    // Обробка кліку
+    button.addEventListener("click", async () => {
+        // Отримуємо поточний стан
+        const data = await chrome.storage.local.get({ isEnabled: true });
+        const newState = !data.isEnabled;
+
+        // Зберігаємо новий стан та оновлюємо UI
+        await chrome.storage.local.set({ isEnabled: newState });
+        updateUI(newState);
     });
 
-    button.addEventListener("click", () => {
-        chrome.storage.local.get({isEnabled : true}, (result) => {
-            const newState = !result.isEnabled;
-
-            await chrome.storage.local.set({isEnabled: newState}, () => {
-                updateUI(newState);
-            });
-        });
-    });
-
-    // оновлення зовнішнього виду кнопки
+    // Оновлення зовнішнього вигляду кнопки
     function updateUI(isEnabled) {
         if (isEnabled) {
             button.classList.remove("off");
             button.classList.add("active");
             btnText.textContent = "Увімкнено";
         } else {
-            button.classList.remove("active")
+            button.classList.remove("active");
             button.classList.add("off");
             btnText.textContent = "Вимкнено";
         }

@@ -1,13 +1,12 @@
 {
-    "name" : "GUARDAI",
-    "description" : "AI-powered phishing detection system developed as a coursework project. The application analyzes URLs and website features to identify potential phishing threats using machine learning techniques. Designed to improve cybersecurity awareness, provide risk assessments, and demonstrate practical AI applications in phishing detection.",
-    "version" : "1.0",
-    "manifest_version" : 3,
-    "action" : {
-        "default_popup" : "popup.html",
-        "defuilt_icon" : "guard_icon",
-    }
-    "permissions": [
+  "name": "GUARDAI",
+  "description": "AI-powered phishing detection system developed as a coursework project. The application analyzes URLs and website features to identify potential phishing threats using machine learning techniques. Designed to improve cybersecurity awareness, provide risk assessments, and demonstrate practical AI applications in phishing detection.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "frontend/popup.html"
+  },
+  "permissions": [
     "tabs",
     "declarativeNetRequest",
     "storage"
@@ -15,11 +14,14 @@
   "host_permissions": [
     "<all_urls>"
   ],
-    "background" : {
-    "server_worker" : "server_worker.js",
-}
-    "content_scripts" : {
-                "matches" : "[*://*/*]",
-                "content" : "[content.js]"
-            }
+  "background": {
+    "service_worker": "server_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+    "run_at": "document_start"
+    }
+  ]
 }

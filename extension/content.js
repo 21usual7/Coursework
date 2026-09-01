@@ -1,38 +1,38 @@
-chrome.storage.local.get({IsEnabled : true}), ({IsEnabled}) => {
-    toggleExtensionWork(IsEnabled);
+console.log("Starting content")
+chrome.storage.local.get({ isEnabled: true }, function (result) {
+    toggleExtensionWork(result.isEnabled);
 });
-
+// Відстеження змін у storage (перемикання кнопки в popup)
 chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.isEnabled) {
         toggleExtensionWork(changes.isEnabled.newValue);
     }
 });
 
-function toggleExtensionWork(isEnabled){
-    if(IsEnabled){
-        chrome.runtime.sendMessage({action : "STATE Changed", enabled : true});
-        handleWorkerResponse()
-    }
-    else{
-        chrome.runtime.sendMessage({action: "STATE Changed", enabled : false});
+// Функція сповіщення background script про зміну стану
+function toggleExtensionWork(isEnabled) {
+    if (isEnabled) {
+        chrome.runtime.sendMessage({ action: "STATE_CHANGED", enabled: true });
+    } else {
+        chrome.runtime.sendMessage({ action: "STATE_CHANGED", enabled: false });
     }
 }
 
-chrome.runtime.onMessage((message, sender, sendResponse)) => {
-    if (message == "Url have been blocked"){
+// Слухач повідомлень від service_worker.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "URL_BLOCKED" || message === "Url have been blocked") {
         alertWindow();
     }
-}
+});
 
+// Вікно попередження користувача
+function alertWindow() {
+    const isConfirmed = confirm("Цей URL є фішинговим. GUARD його заблокував.\nЗалишити його заблокованим?");
 
-function alertWindow(){
-    const isConfirmed = confirm("Цей URL є фішонговим. GUARD його заблоковав.\n Залишити його заблокваним?");
-
-    if (!isConfirmed){
-        chorme.runtime.sendMessage({action: "UNBLOCK URL"});
-        alert("Розблоковую URL... ");
-    }
-    else{
+    if (!isConfirmed) {
+        chrome.runtime.sendMessage({ action: "UNBLOCK_URL" });
+        alert("Розблоковую URL...");
+    } else {
         alert("Ви вирішили залишити його заблокованим.");
     }
 }

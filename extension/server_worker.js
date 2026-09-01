@@ -1,4 +1,5 @@
-// Функція відправки посилання на webserver
+console.log("Service Worker успешно запущен!");
+    // Функція відправки посилання на webserver
 async function sendUrlToBackend(url) {
     // Ігнорування службових сторінок браузера
     if (!url || url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:')) {
