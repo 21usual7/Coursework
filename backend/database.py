@@ -57,13 +57,6 @@ def add_user(username: str, hashed_password: str, email: str) -> str:
     return 'User have been added to DATABASE'
 
     
-def check_username(username: str) -> bool:
-    db = get_db()
-    result = db.execute('SELECT * FROM users WHERE username LIKE VALUES ?', (username,)).fetchone()
-    
-    return result
-
-
 def get_user(email: str, hashed_password: str) -> bool:
     db = get_db()
     cursor = db.execute(

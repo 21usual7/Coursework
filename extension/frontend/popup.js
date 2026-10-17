@@ -1,5 +1,4 @@
 // Керує інтерфейсом спливаючого вікна (кнопка увімк/вимк, збереження налаштувань)
-console.log("HELLO WORLD!")
 document.addEventListener("DOMContentLoaded", async () => {
     const button = document.getElementById("button");
     const btnText = button.querySelector(".btn-text");

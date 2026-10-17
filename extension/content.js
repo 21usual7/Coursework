@@ -1,10 +1,12 @@
 console.log("Starting content")
 chrome.storage.local.get({ isEnabled: true }, function (result) {
+    console.log(1)
     toggleExtensionWork(result.isEnabled);
 });
 // Відстеження змін у storage (перемикання кнопки в popup)
 chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.isEnabled) {
+        console.log(2)
         toggleExtensionWork(changes.isEnabled.newValue);
     }
 });
@@ -12,8 +14,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // Функція сповіщення background script про зміну стану
 function toggleExtensionWork(isEnabled) {
     if (isEnabled) {
+        console.log(3)
         chrome.runtime.sendMessage({ action: "STATE_CHANGED", enabled: true });
     } else {
+        console.log(4)
         chrome.runtime.sendMessage({ action: "STATE_CHANGED", enabled: false });
     }
 }
