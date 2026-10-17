@@ -18,7 +18,7 @@ def api_scan():
         result = check_url(url)
 
         # add_link(1, url, 0)
-        return jsonify({"status": "succes", "url": url, "is_phishing": result["is_phishing"], "probability": result["probability"]}), 200
+        return jsonify({"status": "success", "url": url, "is_phishing": result["is_phishing"], "probability": result["probability"]}), 200
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -34,7 +34,7 @@ def handle_status_changes():
         return jsonify({"response" : res})
 
     except Exception as e:
-        return jsonify({"response" : "error"})
+        return jsonify({"response" : "error"}), 500
     
 
 if __name__ == "__main__":

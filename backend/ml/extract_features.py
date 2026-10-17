@@ -1,11 +1,7 @@
-import time
 import re
 import math
-import socket
-import requests
 import tldextract
 from urllib.parse import urlparse
-import ssl
 from collections import Counter
 
 
@@ -19,8 +15,14 @@ def extract_features(url: str) -> list:
     
     assert isinstance(url, str), "URL is not string type"
     
+    parsed = urlparse(url)
+
+    #Перевірка на розумну довжину
+    features.append(len(parsed.netloc))
+    features.append(len(parsed.path))
+    features.append(1 if len(parsed.query) > 80 else 0)
+
     #Перевірка на https
-    features.append(len(url))
     features.append(1) if "https://" in url else features.append(0)
     features.append(is_ip(url))
 

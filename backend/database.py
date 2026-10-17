@@ -69,9 +69,9 @@ def get_user(email: str, hashed_password: str) -> bool:
 
 def delete_user_from_db(email: str) -> str:
     db = get_db()
-    db.execute('DELETE FROM users WHERE username = like ? ', email) #TODO
+    db.execute('DELETE FROM users WHERE email = like ? ', email) #TODO
     db.commit()    
-    return "USER HAD BENN DELETED [200]" 
+    return "User had been deleted [200]" 
 
 
 #Добавляе до таблиці URL та його статус

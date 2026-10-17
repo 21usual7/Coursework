@@ -26,6 +26,6 @@ def check_url(url):
     malicious_idx = classes.index('malicious') if 'malicious' in classes else 1
     phishing_prob = probabilities[malicious_idx]
 
-    is_phishing = bool(phishing_prob > 0.5)
+    is_phishing = bool(phishing_prob > 0.7)
 
     return {"is_phishing": is_phishing, "probability": phishing_prob}

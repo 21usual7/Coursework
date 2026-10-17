@@ -21,8 +21,7 @@
   "background": {
     "service_worker": "server_worker.js"
   },
-  "content_scripts": [
-    {
+  "content_scripts": [ {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_start"
