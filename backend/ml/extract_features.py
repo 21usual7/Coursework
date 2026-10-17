@@ -17,7 +17,7 @@ def extract_features(url: str) -> list:
     features = []
     domain = urlparse(url).netloc
     
-    assert type(url) is str, "URL is not string type"
+    assert isinstance(url, str), "URL is not string type"
     
     #Перевірка на https
     features.append(len(url))
