@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html lang="eu">
-  <head>
-    <meta charset="utf-8">
-    <title>GUARD AI</title>
-  </head>
-  <body>
-    <h1>GUARD AI</h1>
-    <button type="button" id="button">
-      <span class="btn-text">OFF</span>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GUARD AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="popup-body">
+  <div class="card">
+    <h1 class="logo">GUARD AI</h1>
+    <p class="subtitle">Захист від фішингу</p>
+
+    <button type="button" id="button" class="btn btn-toggle">
+      <span class="btn-text">...</span>
     </button>
 
-    <script src="popup.js"></script>
-  </body>
+    <p class="status-hint" id="statusHint"></p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
 </html>

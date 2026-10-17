@@ -1,31 +1,42 @@
-// керує інтерфейсом спливаючого вікна (кнопка увімк/вимк, збереження налаштувань)
 document.addEventListener("DOMContentLoaded", async () => {
-    const button = document.getElementById("button");
-    const btnText = button.querySelector(".btn-text");
+  const button = document.getElementById("button");
+  const btnText = button.querySelector(".btn-text");
+  const statusHint = document.getElementById("statusHint");
 
-    const result = await chrome.storage.local.get({ isEnabled: true });
-    updateUI(result.isEnabled);
-    // обробка кліку
-    button.addEventListener("click", async () => {
-        // отримуємо поточний стан
-        const data = await chrome.storage.local.get({ isEnabled: true });
-        const newState = !data.isEnabled;
+  // Load saved state
+  const result = await chrome.storage.local.get({ isEnabled: true });
+  updateUI(result.isEnabled);
 
-        // зберігаємо новий стан та оновлюємо UI
-        await chrome.storage.local.set({ isEnabled: newState });
-        updateUI(newState);
-    });
+  // Toggle on click
+  button.addEventListener("click", async () => {
+    const data = await chrome.storage.local.get({ isEnabled: true });
+    const newState = !data.isEnabled;
 
-    // оновлення зовнішнього вигляду кнопки
-    function updateUI(isEnabled) {
-        if (isEnabled) {
-            button.classList.remove("off");
-            button.classList.add("active");
-            btnText.textContent = "увімкнено";
-        } else {
-            button.classList.remove("active");
-            button.classList.add("off");
-            btnText.textContent = "вимкнено";
-        }
+    await chrome.storage.local.set({ isEnabled: newState });
+    updateUI(newState);
+
+    // Notify service worker
+    try {
+      await chrome.runtime.sendMessage({
+        action: "STATE_CHANGED",
+        enabled: newState
+      });
+    } catch (e) {
+      console.warn("Could not notify service worker", e);
     }
+  });
+
+  function updateUI(isEnabled) {
+    if (isEnabled) {
+      button.classList.remove("off");
+      button.classList.add("active");
+      btnText.textContent = "Увімкнено";
+      statusHint.textContent = "Захист активний";
+    } else {
+      button.classList.remove("active");
+      button.classList.add("off");
+      btnText.textContent = "Вимкнено";
+      statusHint.textContent = "Захист вимкнено";
+    }
+  }
 });
