@@ -7,7 +7,7 @@ async function sendUrlToBackend(url) {
     }
 
     try {
-        const response = await fetch('http://guardai/api/scan', {
+        const response = await fetch('http://localhost:1337/guardai/api/scan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -23,6 +23,7 @@ async function sendUrlToBackend(url) {
     }
 }
 
+
 function parse(string) {
     if (!string) return 0;
     const pattern = /\d+(?:\.\d+)?(?=%)/;
@@ -30,9 +31,24 @@ function parse(string) {
     return match ? parseFloat(match[0]) : 0;
 }
 
+
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash) % 2147483647 || 1;
+}
+
+
 // Відстеження зміни URL у всіх вкладках браузера
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.action === "STATE Changed" && message.enabled) {
+        (async () => {
+
+
+
         const url = sender.tab?.url;
         const tabId = sender.tab?.id;
         if (url) {
@@ -40,8 +56,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             if (data && data.probability) {
                 const probability = parse(data.probability);
                 const isPhishingInt = Math.trunc(probability);
-
-                await blockUrl(1, url, isPhishingInt);
+                const ruleId = hashCode(url);
+                await blockUrl(ruleId, url, isPhishingInt);
 
                 if (tabId) {
                     try {
@@ -54,33 +70,29 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                 console.log("APP повернув пусті данні або помилку!");
             }
         }
+        })();
     }
+    return true;
 });
 
 /**
  * @param {number} ruleId
  * @param {string} exactUrl
- * @param {number} probabilityIsPhishing
  */
 
-async function blockUrl(ruleId, exactUrl, probabilityIsPhishing) {
-    const strictFilter = `|${exactUrl}|`;
+async function blockUrl(ruleId, exactUrl) {
     const rule = {
         id: ruleId,
         priority: 1,
-        action: {
-            type: "block"
-        },
+        action: { type: "block" },
         condition: {
-            urlFilter: strictFilter,
-            resourceTypes: ["main_frame", "sub_frame", "script", "xmlhttprequest", "image"]
+            urlFilter: exactUrl,
+            resourceTypes: ["main_frame", "sub_frame"]
         }
     };
 
-    if (probabilityIsPhishing > 50) {
-        await chrome.declarativeNetRequest.updateDynamicRules({
-            removeRuleIds: [ruleId],
-            addRules: [rule]
-        });
-    }
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [ruleId],
+        addRules: [rule]
+    });
 }

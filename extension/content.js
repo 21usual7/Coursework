@@ -24,8 +24,8 @@ function toggleExtensionWork(isEnabled) {
 
 // Слухач повідомлень від service_worker.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "URL_BLOCKED" || message === "Url have been blocked") {
-        alertWindow();
+if (message && message.action === "URL_BLOCKED") {
+        alertWindow);
     }
 });
 
