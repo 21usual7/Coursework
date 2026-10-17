@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const result = await chrome.storage.local.get({ isEnabled: true });
     updateUI(result.isEnabled);
-
     // обробка кліку
     button.addEventListener("click", async () => {
         // отримуємо поточний стан

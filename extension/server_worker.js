@@ -1,5 +1,4 @@
-console.log("Service Worker успешно запущен!");
-    // Функція відправки посилання на webserver
+console.log("Service Worker успешно запущен!"); // Функція відправки посилання на webserver
 async function sendUrlToBackend(url) {
     // Ігнорування службових сторінок браузера
     if (!url || url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:')) {
@@ -44,7 +43,7 @@ function hashCode(str) {
 
 // Відстеження зміни URL у всіх вкладках браузера
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    if (message.action === "STATE Changed" && message.enabled) {
+    if (message.action === "STATE_CHANGED" && message.enabled) {
         (async () => {
 
 
