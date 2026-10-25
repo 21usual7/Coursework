@@ -45,10 +45,10 @@ def check_ssl(url: str) -> dict:
         return status
 
 
-def check_redirects():
+def check_redirects(url: str) -> dict:
     '''Перевіряє кількість перенаправлень'''
 
-    status = {"redirect_count": 0, "has_nultiple_redirects": 0}
+    status = {"redirect_count": 0, "has_multiple_redirects": 0}
 
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "http://" + url
@@ -63,7 +63,7 @@ def check_redirects():
         count = len(response.history)
         status["redirect_count"] = count
 
-        status["has_nultiple_redirects"] = 1 if count > 3 else 0
+        status["has_multiple_redirects"] = 1 if count > 3 else 0
     except Exception:
         pass
 

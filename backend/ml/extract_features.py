@@ -3,7 +3,7 @@ import math
 import tldextract
 from urllib.parse import urlparse
 from collections import Counter
-
+from backend.check_ssl_and_redirects import check_ssl, check_redirects
 
 TRIGGERS = ["login", "signin", "verify", "verification", "authenticate", "account", "security", "secure", "password", "reset", "recover", "unlock", "confirm", "confirmation", "validate", "wallet", "payment", "billing", "invoice", "support", "alert", "warning", "suspended", "blocked", "update", "activate", "authorization", "2fa", "mfa", "credential"]
 
@@ -17,16 +17,25 @@ def extract_features(url: str) -> list:
     
     parsed = urlparse(url)
 
-    #Перевірка на розумну довжину
-    features.append(len(parsed.netloc))
-    features.append(len(parsed.path))
-    features.append(1 if len(parsed.query) > 80 else 0)
+    # Перевірка довжини субдомена
+    ext = tldextract.extract(url)
+    subdomaim_length = len(ext.subdomain)
+    features.append(subdomaim_length)
 
     #Перевірка на https
     features.append(1) if "https://" in url else features.append(0)
     features.append(is_ip(url))
 
-    
+    # Мережеві ознаки
+    ssl_data = check_ssl(url)
+    redirect_data = check_redirects(url)
+
+    features.append(ssl_data.get("ssl_valid", 0))
+    features.append(ssl_data.get("ssl_age", 0))
+    features.append(redirect_data.get("redirect_count", 0))
+    features.append(redirect_data.get("has_multiple_redirects", 0))
+
+    # Інші ознаки
     features.extend(extract_specific_symbols(url=url, domain=domain))
     features.extend(extract_entropy_features(url=url))
     features.extend(extract_trigger_features(url))
