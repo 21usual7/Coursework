@@ -6,7 +6,7 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
-from ml.extract_features import extract_features
+from backend.ml.extract_features import extract_features
 
 ML_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = ML_DIR.parent

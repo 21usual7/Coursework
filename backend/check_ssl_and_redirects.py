@@ -34,7 +34,7 @@ def check_ssl(url: str) -> dict:
                 status["ssl_valid"] = 1
 
                 not_before_str = certificate.get("notBefore")
-                if not not_before_str:
+                if not_before_str:
                     date = datetime.strptime(not_before_str, "%b %d %H:%M:%S %Y %Z")
                     age_days = (datetime.utcnow() - date).days
                     status["ssl_age"] = max(0, age_days)
