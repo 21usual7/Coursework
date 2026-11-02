@@ -2,6 +2,7 @@ import joblib
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from check_isPhishing import check_url
+import os
 
 '''Сервер, що приймає й оброблює запити від server_worker, дістає з них URL-посилання, викликає функцію, що запускає модель та повертає відповідь'''
 
@@ -44,4 +45,5 @@ def api_scan():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=1337)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
