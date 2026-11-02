@@ -52,7 +52,7 @@ async function sendUrlToBackend(url) {
   const cleanUrl = normalizeUrl(url);
 
   try {
-    const response = await fetch("http://localhost:1337/guardai/api/scan", {
+    const response = await fetch("https://coursework-ysbi.onrender.com/guardai/api/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: cleanUrl })
