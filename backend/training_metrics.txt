@@ -1,23 +1,44 @@
-=== REZULTATI NAVCHANNYA MODELI GUARD ===
+=== GUARD AI MODEL RESULTS ===
 
-Всього рядків у датасеті: 642861
-Test Accuracy: 0.9345
+Dataset size: 632796
+Feature count: 48
+Classes: ['benign', 'defacement', 'malware', 'phishing']
 
-Classification Report:
+Accuracy: 0.9325
+Balanced accuracy: 0.9182
+
+Classification report:
               precision    recall  f1-score   support
 
-      benign       0.98      0.94      0.96     85621
-  defacement       0.91      0.99      0.95     19292
-     malware       0.95      0.90      0.92      6504
-    phishing       0.75      0.86      0.80     17156
+      benign       0.99      0.94      0.96     85616
+  defacement       0.90      0.99      0.95     19062
+     malware       0.96      0.88      0.92      4729
+    phishing       0.74      0.87      0.80     17153
 
-    accuracy                           0.93    128573
-   macro avg       0.90      0.92      0.91    128573
-weighted avg       0.94      0.93      0.94    128573
+    accuracy                           0.93    126560
+   macro avg       0.90      0.92      0.91    126560
+weighted avg       0.94      0.93      0.93    126560
 
+Confusion matrix:
+[[80110   649     7  4850]
+ [   69 18886    21    86]
+ [   56   284  4159   230]
+ [ 1070  1083   132 14868]]
 
-Confusion Matrix:
-[[80469   622    46  4484]
- [   80 19060    46   106]
- [   53   341  5824   286]
- [ 1162   972   228 14794]]
+Top 15 features:
+              feature  importance
+hostname_length_ratio    0.110711
+   double_slash_ratio    0.098435
+    path_length_ratio    0.081720
+     subdomain_length    0.076399
+          slash_ratio    0.071985
+  domain_letter_count    0.047892
+          digit_ratio    0.044682
+         letter_ratio    0.042121
+             is_https    0.039984
+           url_length    0.035551
+   domain_digit_count    0.035221
+     subdomain_levels    0.033452
+        suffix_length    0.027618
+          url_entropy    0.026730
+            dot_count    0.024477
