@@ -5,3 +5,4 @@ scikit-learn
 tldextract
 requests
 Werkzeug
+flask-cors
