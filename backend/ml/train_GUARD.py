@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 from backend.ml.extract_features import extract_features
+from tqdm import tqdm
 
 ML_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = ML_DIR.parent
@@ -14,14 +15,8 @@ PROJECT_DIR = ML_DIR.parent
 if str(PROJECT_DIR) not in sys.path:
     sys.path.insert(0, str(PROJECT_DIR))
 
-NAMES = [
-    "url_length",
-    "has_https",
-    "is_ip",
-    "is_specific_symbols",
-    "shannon_entropy",
-    "trigger_features",
-]
+from ml.extract_features import extract_features
+
 
 def train():
     csv_in_project = PROJECT_DIR / "balanced_urls.csv"
@@ -29,8 +24,10 @@ def train():
 
     if csv_in_project.exists():
         csv_path = csv_in_project
+
     elif csv_in_ml.exists():
         csv_path = csv_in_ml
+
     else:
         print(f"ПОМИЛКА: Файл balanced_urls.csv не знайдено")
         print(f"Вміст {PROJECT_DIR}: {os.listdir(PROJECT_DIR)}")
@@ -41,6 +38,13 @@ def train():
 
     print("Вилучення ознак...")
     X_raw = [extract_features(str(url)) for url in data["url"]]
+    print("Извлечение признаков (многопоточно с прогресс-баром)...")
+    urls = [str(url) for url in data["url"]]
+
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        X_raw = list(tqdm(executor.map(extract_features, urls), total=len(urls), desc="Екстракція фіч"))
+
+>>>>>>> fdc9fc0 (ADDED UI FOR UNBLOCKING URL. ALSO EXTRACT FEATURES UPDATE)
     X = pd.DataFrame(X_raw)
     y = data["label"]
 

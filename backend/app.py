@@ -9,7 +9,13 @@ from database import get_db, add_link, change_status
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/api/check_url", methods = ["POST"])
+
+@app.route("/", methods=["GET"])
+def index():
+    return "Welcome, to the backend server of GUARDI! Please, authorize!", 200
+
+
+@app.route("/guardai/api/scan", methods = ["POST"])
 def api_scan():
     data = request.get_json()
 
@@ -24,17 +30,6 @@ def api_scan():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
-@app.route('/api/change/status')
-def change_status():
-    data = request.get_json()
-    user_id, status = data.get['user_id'], data.get['status']
-    try:  
-        res = change_status(user_id, status)
-        return jsonify({"response" : res})
-    except Exception as e:
-        return jsonify({"response" : "error"})
-    
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=1337)

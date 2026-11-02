@@ -2,7 +2,6 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GUARD AI</title>
   <link rel="stylesheet" href="popup.css">
 </head>
@@ -14,10 +13,16 @@
     <button type="button" id="button" class="btn btn-toggle">
       <span class="btn-text">...</span>
     </button>
-
     <p class="status-hint" id="statusHint"></p>
-  </div>
 
+    <div class="history-section">
+      <div class="history-header">
+        <h2>Заблоковані</h2>
+        <button type="button" id="clearHistory" class="btn-link">Очистити</button>
+      </div>
+      <ul id="historyList" class="history-list"></ul>
+    </div>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>

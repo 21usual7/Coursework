@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from datetime import datetime
 import requests
 
+
 def check_ssl(url: str) -> dict:
     '''Функція, що перевіряє наявність та валідність SSL-сертифіката та його вік'''
 
@@ -45,7 +46,7 @@ def check_ssl(url: str) -> dict:
         return status
 
 
-def check_redirects(url: str) -> dict:
+def check_redirects(url: str) -> int:
     '''Перевіряє кількість перенаправлень'''
 
     status = {"redirect_count": 0, "has_multiple_redirects": 0}
