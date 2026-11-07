@@ -1,4 +1,3 @@
-import joblib
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from check_isPhishing import check_url
@@ -30,12 +29,14 @@ def api_scan():
         # Безпечно отримуємо значення незалежно від того, як названо ключ в результаті
         is_phishing = result.get("is_phishing", result.get("is_phisging", False))
         probability = result.get("probability", 0.0)
+        threat_type = result.get("threat_type", "unknown")
 
         return jsonify({
-            "status": "success", 
-            "url": url, 
-            "is_phishing": is_phishing, 
-            "probability": probability
+            "status": "success",
+            "url": url,
+            "is_phishing": is_phishing,
+            "probability": probability,
+            "threat_type": threat_type
         }), 200
 
     except Exception as e:

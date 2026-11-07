@@ -39,16 +39,43 @@ SHORTENERS = {
 EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=None)
 
 
+_SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*://")
+_WWW_RE = re.compile(r"^www\d?\.", re.IGNORECASE)
+
+
+def normalize_url(url: str) -> str:
+    '''Приводить URL до єдиного вигляду: без схеми, "www." та #фрагмента.
+
+    У датасеті схема та "www." майже ідеально корелюють з класом
+    (benign — здебільшого без схеми, defacement — завжди "http://www."),
+    а розширення завжди надсилає "https://...". Без нормалізації модель
+    вчиться розпізнавати формат запису, а не ознаки фішингу.
+    '''
+    url = url.strip()
+    url = _SCHEME_RE.sub("", url)
+    url = _WWW_RE.sub("", url)
+    url = url.split("#", 1)[0]
+    # прибираємо лише кінцевий "/" у корені ("site.com/" == "site.com")
+    if url.endswith("/") and url.count("/") == 1:
+        url = url[:-1]
+    return url
+
+
 def extract_features(url: str) -> list:
     if not isinstance(url, str):
         raise TypeError("URL must be a string")
 
-    url = url.strip()
+    url = normalize_url(url)
 
     if not url:
         raise ValueError("URL cannot be empty")
 
-    parsed = urlparse(url)
+    # схема потрібна лише для коректного розбору hostname
+    try:
+        parsed = urlparse("http://" + url)
+    except ValueError:
+        # напр. "Invalid IPv6 URL" для сміттєвих URL з "[" у хості
+        parsed = urlparse("http://" + url.replace("[", "").replace("]", ""))
     hostname = (parsed.hostname or "").lower()
 
     ext = EXTRACTOR(url)
@@ -61,10 +88,10 @@ def extract_features(url: str) -> list:
 
     features = []
 
-    # 1. Basic features (3)
+    # 1. Basic features (2)
+    # is_https прибрано: у датасеті схема — це "витік" мітки класу
     features.extend([
         len(subdomain),
-        int(parsed.scheme.lower() == "https"),
         _is_ip(hostname)
     ])
 
@@ -115,8 +142,8 @@ def extract_features(url: str) -> list:
         _additional_features(url, parsed, hostname)
     )
 
-    assert len(features) == 48, (
-        f"Expected 48 features, got {len(features)}"
+    assert len(features) == N_FEATURES, (
+        f"Expected {N_FEATURES} features, got {len(features)}"
     )
 
     return features
@@ -288,7 +315,6 @@ def get_feature_names() -> list:
     return [
         # Basic
         "subdomain_length",
-        "is_https",
         "is_ip",
 
         # Symbols
@@ -352,3 +378,6 @@ def get_feature_names() -> list:
         "path_has_double_slash",
         "is_shortened_url"
     ]
+
+
+N_FEATURES = len(get_feature_names())
