@@ -6,6 +6,11 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body class="popup-body">
+  <button type="button" id="historyToggle" class="history-toggle" title="Заблоковані сайти">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z"/></svg>
+    <span id="historyCount">0</span>
+  </button>
+
   <div class="card">
     <h1 class="logo">GUARD AI</h1>
     <p class="subtitle">Захист від фішингу</p>
@@ -15,13 +20,15 @@
     </button>
     <p class="status-hint" id="statusHint"></p>
 
-    <div class="history-section">
-      <div class="history-header">
-        <h2>Заблоковані</h2>
-        <button type="button" id="clearHistory" class="btn-link">Очистити</button>
-      </div>
-      <ul id="historyList" class="history-list"></ul>
+  </div>
+
+  <div id="historyPanel" class="history-panel">
+    <div class="history-header">
+      <h2>Заблоковані</h2>
+      <button type="button" id="clearHistory" class="btn-link">Очистити</button>
+      <button type="button" id="historyClose" class="history-close" title="Закрити">×</button>
     </div>
+    <ul id="historyList" class="history-list"></ul>
   </div>
   <script src="popup.js"></script>
 </body>

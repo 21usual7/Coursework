@@ -4,6 +4,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const statusHint = document.getElementById("statusHint");
   const historyList = document.getElementById("historyList");
   const clearBtn = document.getElementById("clearHistory");
+  const historyPanel = document.getElementById("historyPanel");
+  const historyCount = document.getElementById("historyCount");
+
+  // ----- Панель заблокованих (виїжджає справа) -----
+  document.getElementById("historyToggle").addEventListener("click", async () => {
+    await loadHistory();
+    document.body.classList.add("panel-open");
+    historyPanel.classList.add("open");
+  });
+
+  document.getElementById("historyClose").addEventListener("click", () => {
+    historyPanel.classList.remove("open");
+    document.body.classList.remove("panel-open");
+  });
 
   // ----- toggle -----
   const result = await chrome.storage.local.get({ isEnabled: true });
@@ -52,15 +66,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     historyList.innerHTML = "";
+    historyCount.textContent = history.length;
 
     if (!history.length) {
       historyList.innerHTML = '<li class="empty">Поки нічого не заблоковано</li>';
       return;
     }
 
-    for (const item of history) {
+    for (const [i, item] of history.entries()) {
       const li = document.createElement("li");
       li.className = "history-item";
+      // картки з'являються по черзі
+      li.style.animationDelay = `${i * 60}ms`;
 
       const info = document.createElement("div");
       info.className = "history-info";
