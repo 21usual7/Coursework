@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <a class="history-url" href="${escapeHtml(item.url)}" target="_blank" title="${escapeHtml(item.url)}">
           ${escapeHtml(truncate(item.url, 42))}
         </a>
-        <span class="history-meta">${formatTime(item.time)} · ${prob}</span>
+        <span class="history-meta">${formatTime(item.time)} <b class="history-prob">${prob}</b></span>
       `;
 
       const unblockBtn = document.createElement("button");
