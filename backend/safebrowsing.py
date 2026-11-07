@@ -39,3 +39,6 @@ def check_google_safe_browsing(url: str) -> bool:
             return False
     except Exception:
         return False
+
+    # відповідь не 200 (невірний ключ, вичерпано ліміт) - вважаємо, що не знайдено
+    return False

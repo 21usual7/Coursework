@@ -4,6 +4,7 @@ import numpy as np
 from ml.extract_features import extract_features, EXTRACTOR, SHORTENERS
 from check_rules import check_rules
 from check_ssl_and_redirects import check_redirects
+from safebrowsing import check_google_safe_browsing
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -58,6 +59,13 @@ def check_url(url, follow_redirects=True):
                 phishing_prob = final["probability"]
                 threat_type = final["threat_type"]
                 reasons = [f"перенаправляє на {final_domain}"] + final["reasons"]
+
+    # База відомих загроз Google: ловить те, що за виглядом URL не визначити
+    # (зламані сайти, фішинг зі "звичайною" адресою). Модель і правила - для нових загроз
+    if check_google_safe_browsing(url):
+        phishing_prob = 1.0
+        threat_type = "phishing"
+        reasons = ["є в базі Google Safe Browsing"] + reasons
 
     is_phishing = bool(phishing_prob >= THRESHOLD)
 
