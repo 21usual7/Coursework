@@ -36,6 +36,28 @@ function isSafeDomain(url) {
 }
 
 
+// Кеш відповідей сервера: повторні переходи на той самий URL не йдуть на сервер.
+// chrome.storage.session, а не змінна - service worker засинає через ~30 с без подій
+// і змінні при цьому зникають; session живе до закриття браузера
+const CACHE_TTL = 30 * 60 * 1000;
+
+async function getCached(url) {
+  const { scanCache = {} } = await chrome.storage.session.get({ scanCache: {} });
+  const item = scanCache[url];
+  return item && Date.now() - item.time < CACHE_TTL ? item.data : null;
+}
+
+async function saveToCache(url, data) {
+  const { scanCache = {} } = await chrome.storage.session.get({ scanCache: {} });
+  // заодно прибираємо застарілі записи
+  for (const key of Object.keys(scanCache)) {
+    if (Date.now() - scanCache[key].time >= CACHE_TTL) delete scanCache[key];
+  }
+  scanCache[url] = { data, time: Date.now() };
+  await chrome.storage.session.set({ scanCache });
+}
+
+
 async function sendUrlToBackend(url) {
   if (!url || url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:") || url.startsWith("chrome-extension://")) {
     return null;
@@ -53,14 +75,26 @@ async function sendUrlToBackend(url) {
   // модель використовує параметри як ознаки
   const cleanUrl = url.split("#")[0];
 
+  const cached = await getCached(cleanUrl);
+  if (cached) {
+    console.log(`З кешу: ${cleanUrl}`, cached);
+    return cached;
+  }
+
   try {
     const response = await fetch("https://coursework-ysbi.onrender.com/guardai/api/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: cleanUrl })
+      body: JSON.stringify({ url: cleanUrl }),
+      // Без таймауту перевірка висить, поки Render "прокидається" (30-60 с).
+      // Після 5 с сторінка просто відкривається без перевірки
+      signal: AbortSignal.timeout(5000)
     });
     const data = await response.json();
     console.log(`Проскановано URL ${url} -> ${cleanUrl}`, data);
+    if (data.status === "success") {
+      await saveToCache(cleanUrl, data);
+    }
     return data;
   } catch (error) {
     console.error("Помилка відправки на webserver", error);

@@ -28,15 +28,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const newState = !data.isEnabled;
     await chrome.storage.local.set({ isEnabled: newState });
     updateUI(newState);
-
-    try {
-      await chrome.runtime.sendMessage({
-        action: "state_changed",
-        enabled: newState
-      });
-    } catch (e) {
-      console.warn("Could not notify service worker", e);
-    }
   });
 
   function updateUI(isEnabled) {
