@@ -30,13 +30,15 @@ def api_scan():
         is_phishing = result.get("is_phishing", result.get("is_phisging", False))
         probability = result.get("probability", 0.0)
         threat_type = result.get("threat_type", "unknown")
+        reasons = result.get("reasons", [])
 
         return jsonify({
             "status": "success",
             "url": url,
             "is_phishing": is_phishing,
             "probability": probability,
-            "threat_type": threat_type
+            "threat_type": threat_type,
+            "reasons": reasons
         }), 200
 
     except Exception as e:

@@ -2,6 +2,7 @@ import joblib
 import os
 import numpy as np
 from ml.extract_features import extract_features
+from check_rules import check_rules
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,6 +31,13 @@ def check_url(url):
 
     threat_type = str(classes[probabilities.argmax()])
 
+    # правила ловлять очевидний фішинг, який модель пропускає (paypal-login-verify.xyz),
+    # тому беремо більшу з двох оцінок
+    rules = check_rules(url)
+    if rules["score"] > phishing_prob:
+        phishing_prob = rules["score"]
+        threat_type = "phishing"
+
     is_phishing = bool(phishing_prob >= THRESHOLD)
 
-    return {"is_phishing": is_phishing, "probability": round(phishing_prob, 4), "threat_type": threat_type}
+    return {"is_phishing": is_phishing, "probability": round(phishing_prob, 4), "threat_type": threat_type, "reasons": rules["reasons"]}
