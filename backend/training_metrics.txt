@@ -1,44 +1,61 @@
-=== GUARD AI MODEL RESULTS ===
+=== rezultati navchannya modeli guard ===
 
-Dataset size: 632796
-Feature count: 48
-Classes: ['benign', 'defacement', 'malware', 'phishing']
+всього рядків у датасеті: 642861, після очистки: 670933
+кількість ознак: 47
+test accuracy: 0.8879
 
-Accuracy: 0.9325
-Balanced accuracy: 0.9182
-
-Classification report:
+classification report:
               precision    recall  f1-score   support
 
-      benign       0.99      0.94      0.96     85616
-  defacement       0.90      0.99      0.95     19062
-     malware       0.96      0.88      0.92      4729
-    phishing       0.74      0.87      0.80     17153
+      benign     0.8832    0.9747    0.9267     94225
+  defacement     0.9287    0.8636    0.8950     19062
+     malware     0.9922    0.8582    0.9203      4718
+    phishing     0.8087    0.4195    0.5525     16182
 
-    accuracy                           0.93    126560
-   macro avg       0.90      0.92      0.91    126560
-weighted avg       0.94      0.93      0.93    126560
+    accuracy                         0.8879    134187
+   macro avg     0.9032    0.7790    0.8236    134187
+weighted avg     0.8845    0.8879    0.8768    134187
 
-Confusion matrix:
-[[80110   649     7  4850]
- [   69 18886    21    86]
- [   56   284  4159   230]
- [ 1070  1083   132 14868]]
 
-Top 15 features:
-              feature  importance
-hostname_length_ratio    0.110711
-   double_slash_ratio    0.098435
-    path_length_ratio    0.081720
-     subdomain_length    0.076399
-          slash_ratio    0.071985
-  domain_letter_count    0.047892
-          digit_ratio    0.044682
-         letter_ratio    0.042121
-             is_https    0.039984
-           url_length    0.035551
-   domain_digit_count    0.035221
-     subdomain_levels    0.033452
-        suffix_length    0.027618
-          url_entropy    0.026730
-            dot_count    0.024477
+confusion matrix (['benign', 'defacement', 'malware', 'phishing']):
+[[91838   916     5  1466]
+ [ 2521 16462     2    77]
+ [  563    43  4049    63]
+ [ 9064   304    25  6789]]
+
+бінарна задача (benign vs небезпечний), ROC-AUC = 0.9548
+  поріг 0.4: precision=0.8335 recall=0.8045 f1=0.8187 FPR=0.0681
+  поріг 0.5: precision=0.8970 recall=0.7311 f1=0.8056 FPR=0.0356
+  поріг 0.6: precision=0.9438 recall=0.6547 f1=0.7731 FPR=0.0165
+  поріг 0.7: precision=0.9732 recall=0.5800 f1=0.7268 FPR=0.0068
+  поріг 0.8: precision=0.9892 recall=0.5048 f1=0.6685 FPR=0.0023
+
+лише оригінальний датасет: accuracy=0.8810 ROC-AUC=0.9536 (поріг 0.6: precision=0.9483 recall=0.6547)
+хибні тривоги на популярних сайтах (Tranco, поріг 0.6): 0.0143
+
+топ-15 важливих ознак:
+  suffix_length              0.0875
+  slash_ratio                0.0769
+  equals_structure_ratio     0.0600
+  letter_ratio               0.0527
+  domain_entropy             0.0516
+  url_entropy                0.0511
+  domain_letter_count        0.0499
+  path_length_ratio          0.0494
+  hostname_length_ratio      0.0475
+  url_length                 0.0463
+  uppercase_ratio            0.0445
+  digit_ratio                0.0421
+  special_char_ratio         0.0408
+  ampersand_ratio            0.0400
+  dot_count                  0.0363
+
+перевірка на реальних URL (P(небезпечний), клас):
+  0.04  benign      https://www.bbc.com/news
+  0.04  benign      http://www.bbc.com/news
+  0.25  benign      https://example.com/
+  0.78  phishing    https://github.com/user/repo
+  0.20  benign      https://www.amazon.com/dp/B08N5WRWNW
+  0.33  benign      http://paypal-login-verify.xyz/signin
+  0.23  benign      http://secure-appleid.apple.com.verify-account.tk/login.php
+  0.67  phishing    http://192.168.10.5/bank/update/index.php?acc=1
