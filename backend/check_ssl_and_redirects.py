@@ -1,6 +1,7 @@
 import ssl
 import socket
-from urllib.parse import urlparse
+import ipaddress
+from urllib.parse import urlparse, urljoin
 from datetime import datetime
 import requests
 
@@ -46,26 +47,60 @@ def check_ssl(url: str) -> dict:
         return status
 
 
-def check_redirects(url: str) -> int:
-    '''Перевіряє кількість перенаправлень'''
+MAX_REDIRECTS = 5
 
-    status = {"redirect_count": 0, "has_multiple_redirects": 0}
+
+def _is_public_host(url: str) -> bool:
+    '''Чи веде URL на публічну адресу. Захист від SSRF: без цього через наш публічний API
+    можна змусити сервер звертатися до localhost чи внутрішніх адрес (169.254.169.254 тощо)'''
+
+    parsed_url = urlparse(url)
+    if parsed_url.scheme not in ("http", "https") or not parsed_url.hostname:
+        return False
+
+    try:
+        addresses = socket.getaddrinfo(parsed_url.hostname, None)
+    except socket.gaierror:
+        return False
+
+    return all(ipaddress.ip_address(a[4][0]).is_global for a in addresses)
+
+
+def check_redirects(url: str) -> dict:
+    '''Йде по перенаправленнях і повертає кінцеву адресу.
+    Корисна саме кінцева адреса (bit.ly/xxx -> paypal-login.xyz), а не кількість
+    перенаправлень: звичайні сайти теж перенаправляють по 3-5 разів'''
+
+    status = {"redirect_count": 0, "final_url": url, "error": None}
 
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "http://" + url
 
+    current = url
     try:
-        response = requests.head(
-            url,
-            allow_redirects=True,
-            timeout=1.5,
-            headers={"User-Agent": "Mozilla/5.0"}
-        )
-        count = len(response.history)
-        status["redirect_count"] = count
+        # по кроках, а не allow_redirects=True - щоб перевіряти кожну адресу на SSRF
+        for _ in range(MAX_REDIRECTS):
+            if not _is_public_host(current):
+                status["error"] = "not public host"
+                break
 
-        status["has_multiple_redirects"] = 1 if count > 3 else 0
-    except Exception:
-        pass
+            response = requests.get(
+                current,
+                allow_redirects=False,
+                timeout=2,
+                stream=True,  # тіло сторінки не завантажуємо
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
+            response.close()
 
+            location = response.headers.get("Location")
+            if response.status_code not in (301, 302, 303, 307, 308) or not location:
+                break
+
+            current = urljoin(current, location)
+            status["redirect_count"] += 1
+    except Exception as e:
+        status["error"] = str(e)
+
+    status["final_url"] = current
     return status
