@@ -37,7 +37,7 @@ function isSafeDomain(url) {
 
 
 async function sendUrlToBackend(url) {
-  if (!url || url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:")) {
+  if (!url || url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:") || url.startsWith("chrome-extension://")) {
     return null;
   }
   if (isSafeDomain(url)) {
@@ -49,7 +49,9 @@ async function sendUrlToBackend(url) {
     return null;
   }
 
-  const cleanUrl = normalizeUrl(url);
+  // Відправляємо повний URL (з параметрами після "?"), прибираємо лише #якір —
+  // модель використовує параметри як ознаки
+  const cleanUrl = url.split("#")[0];
 
   try {
     const response = await fetch("https://coursework-ysbi.onrender.com/guardai/api/scan", {
@@ -135,47 +137,43 @@ async function blockUrl(ruleId, exactUrl) {
 }
 
 
+// Перевірка ще до завантаження сторінки: якщо URL фішинговий,
+// вкладка перенаправляється на сторінку-попередження
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  if (details.frameId !== 0) return;
+
+  const { isEnabled } = await chrome.storage.local.get({ isEnabled: true });
+  if (!isEnabled) return;
+
+  const url = details.url;
+  const tabId = details.tabId;
+
+  const data = await sendUrlToBackend(url);
+  if (!data) return;
+
+  const probability = typeof data.probability === "number"
+    ? data.probability
+    : parseFloat(data.probability) || 0;
+
+  const isPhishing = data.is_phishing === true || probability > 0.9;
+
+  if (isPhishing) {
+    const ruleId = hashCode(url);
+    await blockUrl(ruleId, url);
+    await addToBlockedHistory(url, probability);
+
+    const warningPage = chrome.runtime.getURL("frontend/blocked.html") + "?url=" + encodeURIComponent(url);
+    chrome.tabs.update(tabId, { url: warningPage });
+  } else {
+    console.log(`Safe: ${url} (prob=${probability})`);
+  }
+});
+
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || !message.action) return;
 
   const action = message.action.toLowerCase();
-
-  if (action === "state_changed" && message.enabled) {
-    (async () => {
-      const url = sender.tab?.url;
-      const tabId = sender.tab?.id;
-      if (!url) return;
-
-      const data = await sendUrlToBackend(url);
-      if (!data) return;
-
-      const probability = typeof data.probability === "number"
-        ? data.probability
-        : parseFloat(data.probability) || 0;
-
-      const isPhishing = data.is_phishing === true || probability > 0.9;
-
-      if (isPhishing) {
-        const ruleId = hashCode(url);
-        await blockUrl(ruleId, url);
-        await addToBlockedHistory(url, probability);
-
-        if (tabId) {
-          try {
-            await chrome.tabs.sendMessage(tabId, {
-              action: "url_blocked", 
-              url: url
-            });
-          } catch (e) {
-            console.log("Не зміг відправити повідомлення на вкладку", e);
-          }
-        }
-      } else {
-        console.log(`Safe: ${url} (prob=${probability})`);
-      }
-    })();
-    return true;
-  }
 
   // 2) разблокировка из popup / content 
   if (action === "unblock_url" && message.url) {

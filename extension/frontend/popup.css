@@ -78,11 +78,83 @@ body.popup-body {
   text-align: center;
 }
 
-.history-section {
+/* Кнопка в правому куті */
+.history-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.history-toggle:hover {
+  background: #fecaca;
+}
+
+.history-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Панель заблокованих, виїжджає справа.
+   overflow: hidden на html - щоб схована панель не розширювала вікно попапу */
+html {
+  overflow: hidden;
+}
+
+body.popup-body {
+  position: relative;
+  overflow: hidden;
+  transition: min-height 0.3s ease;
+}
+
+body.popup-body.panel-open {
+  min-height: 360px;
+}
+
+.history-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
-  margin-top: 12px;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 10px;
+  padding: 16px;
+  background: #ffffff;
+  box-shadow: -4px 0 16px rgba(15, 23, 42, 0.12);
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform 0.3s ease, visibility 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.history-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.history-panel .history-list {
+  max-height: none;
+  flex: 1;
 }
 
 .history-header {
@@ -93,6 +165,7 @@ body.popup-body {
 }
 
 .history-header h2 {
+  flex: 1;
   font-size: 13px;
   font-weight: 600;
   color: #334155;
@@ -124,6 +197,19 @@ body.popup-body {
   padding: 8px;
   background: #f1f5f9;
   border-radius: 6px;
+  opacity: 0;
+  animation: card-in 0.3s ease forwards;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .history-info {
@@ -179,4 +265,24 @@ body.popup-body {
 
 body.popup-body {
   width: 280px; 
+}
+
+/* Сторінка-попередження (blocked.html) */
+body.blocked-body {
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 24px;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.blocked-url {
+  width: 100%;
+  padding: 8px;
+  font-size: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 6px;
+  word-break: break-all;
+  text-align: center;
 }
