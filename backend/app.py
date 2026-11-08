@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -9,7 +8,8 @@ import os
 '''Сервер, що приймає й оброблює запити від server_worker, дістає з них URL-посилання, викликає функцію, що запускає модель та повертає відповідь'''
 
 app = Flask(__name__)
-CORS(app)
+# запит - лише {"url": ...}: велике тіло відхиляємо одразу (413), щоб не вичерпати 512 МБ пам'яті
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
 # На Render запити йдуть через проксі: справжня IP-адреса клієнта - у X-Forwarded-For
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
@@ -30,12 +30,12 @@ def index():
 
 
 @app.route("/guardai/api/scan", methods=["POST"])
-@limiter.limit("60 per minute")
+@limiter.limit("60 per minute;1000 per day")
 def api_scan():
     data = request.get_json()
 
-    if not data or "url" not in data:
-        return jsonify({"status": "error", "message": "Missing 'url' in request body"}), 400
+    if not isinstance(data, dict) or not isinstance(data.get("url"), str) or not 0 < len(data["url"]) <= 2048:
+        return jsonify({"status": "error", "message": "Missing or invalid 'url' in request body"}), 400
 
     url = data["url"]
 
@@ -60,7 +60,8 @@ def api_scan():
     except Exception as e:
         import traceback
         traceback.print_exc()  
-        return jsonify({"status": "error", "message": str(e)}), 500
+        # подробиці - лише в лог сервера, не клієнту
+        return jsonify({"status": "error", "message": "Internal error"}), 500
 
 
 if __name__ == "__main__":
