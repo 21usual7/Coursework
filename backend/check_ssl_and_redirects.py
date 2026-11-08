@@ -3,7 +3,9 @@ import socket
 import ipaddress
 from urllib.parse import urlparse, urljoin
 from datetime import datetime
+import time
 import requests
+from urllib3.util import parse_url
 
 
 def check_ssl(url: str) -> dict:
@@ -54,12 +56,21 @@ def _is_public_host(url: str) -> bool:
     '''Чи веде URL на публічну адресу. Захист від SSRF: без цього через наш публічний API
     можна змусити сервер звертатися до localhost чи внутрішніх адрес (169.254.169.254 тощо)'''
 
-    parsed_url = urlparse(url)
-    if parsed_url.scheme not in ("http", "https") or not parsed_url.hostname:
+    # хост беремо тим самим розбором, що й requests: urlparse читає "http://127.0.0.1\@bit.ly"
+    # як bit.ly, а requests підключається до 127.0.0.1
+    try:
+        parsed_url = parse_url(url)
+    except ValueError:
+        return False
+    if parsed_url.scheme not in ("http", "https") or not parsed_url.host:
+        return False
+
+    # лише стандартні порти: інакше через сервер можна сканувати порти чужих хостів
+    if parsed_url.port not in (None, 80, 443):
         return False
 
     try:
-        addresses = socket.getaddrinfo(parsed_url.hostname, None)
+        addresses = socket.getaddrinfo(parsed_url.host.strip("[]"), None)
     except socket.gaierror:
         return False
 
@@ -77,9 +88,16 @@ def check_redirects(url: str) -> dict:
         url = "http://" + url
 
     current = url
+    start = time.monotonic()
     try:
         # по кроках, а не allow_redirects=True - щоб перевіряти кожну адресу на SSRF
         for _ in range(MAX_REDIRECTS):
+            # timeout=2 діє на кожне читання окремо, тож обмежуємо і загальний час:
+            # розширення чекає відповідь лише 5 с
+            if time.monotonic() - start > 4:
+                status["error"] = "timeout"
+                break
+
             if not _is_public_host(current):
                 status["error"] = "not public host"
                 break

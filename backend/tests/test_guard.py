@@ -83,6 +83,8 @@ def test_brand_alone_is_only_a_reason():
     "http://169.254.169.254/latest/meta-data/",
     "http://10.0.0.1/",
     "ftp://example.com/",
+    "http://127.0.0.1\\@bit.ly/",      # urlparse бачить bit.ly, а requests іде на 127.0.0.1
+    "http://8.8.8.8:22/",               # нестандартний порт
 ])
 def test_redirects_block_private_addresses(url):
     assert check_redirects(url)["error"] == "not public host"
@@ -128,6 +130,17 @@ def test_short_link_to_phishing_is_blocked(monkeypatch):
 def test_api_missing_url():
     response = app.test_client().post("/guardai/api/scan", json={})
     assert response.status_code == 400
+
+
+@pytest.mark.parametrize("body", [{"url": 123}, {"url": ""}, {"url": "http://a.com/" + "a" * 3000}, ["url"]])
+def test_api_invalid_url(body):
+    response = app.test_client().post("/guardai/api/scan", json=body)
+    assert response.status_code == 400
+
+
+def test_api_body_too_large():
+    response = app.test_client().post("/guardai/api/scan", json={"url": "a" * 20000})
+    assert response.status_code == 413
 
 
 def test_api_scan():
