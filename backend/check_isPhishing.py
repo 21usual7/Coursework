@@ -61,8 +61,9 @@ def check_url(url, follow_redirects=True):
                 reasons = [f"перенаправляє на {final_domain}"] + final["reasons"]
 
     # База відомих загроз Google: ловить те, що за виглядом URL не визначити
-    # (зламані сайти, фішинг зі "звичайною" адресою). Модель і правила - для нових загроз
-    if check_google_safe_browsing(url):
+    # (зламані сайти, фішинг зі "звичайною" адресою). Модель і правила - для нових загроз.
+    # Якщо сайт уже заблоковано, до Google не звертаємось - економимо час і ліміт запитів
+    if phishing_prob < THRESHOLD and check_google_safe_browsing(url):
         phishing_prob = 1.0
         threat_type = "phishing"
         reasons = ["є в базі Google Safe Browsing"] + reasons
