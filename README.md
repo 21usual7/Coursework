@@ -30,6 +30,7 @@ backend/
   check_rules.py              правила поверх моделі
   check_ssl_and_redirects.py  перехід по перенаправленнях (із захистом від SSRF)
   safebrowsing.py             перевірка в базі Google Safe Browsing
+  tests/test_guard.py         тести (pytest)
   training_metrics.txt        метрики останнього навчання
   ml/
     extract_features.py       нормалізація URL і 47 ознак
@@ -91,6 +92,18 @@ curl -X POST http://localhost:5000/guardai/api/scan \
 Версії бібліотек у `requirements.txt` зафіксовані: `coursework.pkl` завантажується лише
 тією версією scikit-learn, якою модель навчена (1.9.0).
 
+## Тести
+
+```bash
+cd backend
+pip install pytest
+python -m pytest tests -q
+```
+
+29 тестів: ознаки, правила, захист від SSRF, підсумкова перевірка, API (зокрема
+обмеження частоти запитів). Мережеві перевірки підмінено заглушками — тести не
+звертаються до Google і працюють без інтернету.
+
 ## Встановлення розширення
 
 1. Відкрити `chrome://extensions`
@@ -123,6 +136,8 @@ python ml/train_GUARD.py                          # -> ml/coursework.pkl, traini
 Повні метрики — у `backend/training_metrics.txt`.
 
 ## Обмеження
+
+- API обмежено до 60 запитів на хвилину з однієї IP-адреси (далі — відповідь 429).
 
 - Аналізується лише рядок URL, не вміст сторінки.
 - Безкоштовний Render засинає після 15 хв простою і прокидається 30–60 с; у цей час

@@ -1,5 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 from check_isPhishing import check_url
 import os
 
@@ -8,6 +11,18 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# На Render запити йдуть через проксі: справжня IP-адреса клієнта - у X-Forwarded-For
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+
+# API публічне і без авторизації: обмежуємо кількість запитів з однієї IP,
+# щоб ніхто не перевантажив сервер і не вичерпав ліміт Google Safe Browsing (10 000/добу)
+limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
+
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    return jsonify({"status": "error", "message": "Too many requests, try again later"}), 429
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -15,6 +30,7 @@ def index():
 
 
 @app.route("/guardai/api/scan", methods=["POST"])
+@limiter.limit("60 per minute")
 def api_scan():
     data = request.get_json()
 
