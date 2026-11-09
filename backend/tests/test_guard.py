@@ -14,7 +14,7 @@ if BASE_DIR not in sys.path:
 import check_isPhishing
 from app import app
 from check_rules import check_rules
-from check_ssl_and_redirects import check_redirects
+from check_ssl_and_redirects import check_redirects, _is_public_ip
 from ml.extract_features import extract_features, normalize_url, N_FEATURES
 
 @pytest.fixture(autouse=True)
@@ -88,6 +88,11 @@ def test_brand_alone_is_only_a_reason():
 ])
 def test_redirects_block_private_addresses(url):
     assert check_redirects(url)["error"] == "not public host"
+
+
+@pytest.mark.parametrize("address", ["::127.0.0.1", "::ffff:10.0.0.1", "64:ff9b::a9fe:a9fe"])
+def test_ipv6_with_private_ipv4_is_not_public(address):
+    assert not _is_public_ip(address)
 
 
 # --- Підсумкова перевірка ---

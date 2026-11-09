@@ -32,7 +32,7 @@ def index():
 @app.route("/guardai/api/scan", methods=["POST"])
 @limiter.limit("60 per minute;1000 per day")
 def api_scan():
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not isinstance(data, dict) or not isinstance(data.get("url"), str) or not 0 < len(data["url"]) <= 2048:
         return jsonify({"status": "error", "message": "Missing or invalid 'url' in request body"}), 400
