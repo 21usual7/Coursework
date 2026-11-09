@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SAFE_BROWSING_API_KEY = os.getenv("GSB_API_KEY") # Треба зробити локальний .env файл з api ключем google safe browsing і додати його в .gitignore
+SAFE_BROWSING_API_KEY = os.getenv("GSB_API_KEY") 
 
 def check_google_safe_browsing(url: str) -> bool:
     '''Перевіряє URL через Google Safe Browsing API. Повертає True якщо сайт знайдено в базі небезпечних посилань. False - якщо не знайдено або виникла помилка'''

@@ -17,7 +17,6 @@ if str(project_dir) not in sys.path:
 
 from ml.extract_features import extract_features, normalize_url, get_feature_names
 
-# URL-и для ручної перевірки: модель має розрізняти їх незалежно від схеми / www
 SANITY_URLS = [
     "https://www.bbc.com/news",
     "http://www.bbc.com/news",
@@ -94,13 +93,7 @@ def train():
     )
 
     print("навчання моделі...")
-    # параметри підібрано за якістю, розміром файлу та пам'яттю (див. таблицю у звіті):
-    # 30 дерев і min_samples_leaf=3 дають ~29 МБ на диску і ~420 МБ пікової RAM
-    # (без обмежень файл ~250 МБ, не влазить у GitHub і 512 МБ RAM на Render).
-    # без class_weight: у реальному браузингу фішинг рідкісний,
-    # тож хибна тривога на звичайному сайті дорожча за пропуск
     mod = RandomForestClassifier(n_estimators=30, min_samples_leaf=3, random_state=42, n_jobs=-1)
-    # .values - бо на сервері подається numpy-масив без імен колонок
     mod.fit(x_train.values, y_train)
 
     y_pred = mod.predict(x_test.values)
@@ -112,7 +105,6 @@ def train():
     acc = accuracy_score(y_test, y_pred)
     auc = binary_metrics(y_test, proba, mod.classes_, 0.5)["auc"]
 
-    # ті самі метрики лише на рядках з оригінального датасету - для чесного порівняння
     orig = (src_test == "original").values
     orig_acc = accuracy_score(y_test[orig], y_pred[orig])
     orig_m = binary_metrics(y_test[orig], proba[orig], mod.classes_, 0.6)
