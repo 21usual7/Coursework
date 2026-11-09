@@ -1,4 +1,3 @@
-
 import re
 import math
 import ipaddress
@@ -45,11 +44,6 @@ _WWW_RE = re.compile(r"^www\d?\.", re.IGNORECASE)
 
 def normalize_url(url: str) -> str:
     '''Приводить URL до єдиного вигляду: без схеми, "www." та #фрагмента.
-
-    У датасеті схема та "www." майже ідеально корелюють з класом
-    (benign — здебільшого без схеми, defacement — завжди "http://www."),
-    а розширення завжди надсилає "https://...". Без нормалізації модель
-    вчиться розпізнавати формат запису, а не ознаки фішингу.
     '''
     url = url.strip()
     url = _SCHEME_RE.sub("", url)
