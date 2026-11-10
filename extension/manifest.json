@@ -19,6 +19,16 @@
     "http://localhost:1337/*"
   ],
   "background": {
-    "service_worker": "server_worker.js"
+    "service_worker": "server_worker.js",
+    "scripts": ["server_worker.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "guardai@coursework",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["browsingActivity"]
+      }
+    }
   }
 }
