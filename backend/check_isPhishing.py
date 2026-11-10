@@ -1,7 +1,7 @@
 import joblib
 import os
 import numpy as np
-from ml.extract_features import extract_features, EXTRACTOR, SHORTENERS
+from ml.extract_features import extract_features, EXTRACTOR, SHORTENERS, PLATFORMS
 from check_rules import check_rules
 from check_ssl_and_redirects import check_redirects
 from safebrowsing import check_google_safe_browsing
@@ -35,6 +35,12 @@ def check_url(url, follow_redirects=True):
     phishing_prob = float(1 - probabilities[benign_idx])
 
     threat_type = str(classes[probabilities.argmax()])
+
+    # На спільних хостингах (github.io, vercel.app...) фішинг і звичайний сайт мають однакові
+    # адреси, і модель блокувала чверть легітимних сторінок. Тут лишаються правила і Safe Browsing
+    if EXTRACTOR(url).top_domain_under_public_suffix in PLATFORMS:
+        phishing_prob = 0.0
+        threat_type = "benign"
 
     # правила ловлять очевидний фішинг, який модель пропускає (paypal-login-verify.xyz),
     # тому беремо більшу з двох оцінок

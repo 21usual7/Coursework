@@ -69,6 +69,13 @@ def test_rules_do_not_block_normal_sites(url):
     assert check_rules(url)["score"] < check_isPhishing.THRESHOLD
 
 
+def test_platform_sites():
+    # офіційні сторінки компаній на github.io не блокуються, а бренд + тригер - так
+    assert check_isPhishing.check_url("https://microsoft.github.io/autogen/")["is_phishing"] is False
+    assert check_isPhishing.check_url("https://depth-anything-v2.github.io/")["is_phishing"] is False
+    assert check_isPhishing.check_url("https://paypal-login.web.app/")["is_phishing"] is True
+
+
 def test_brand_alone_is_only_a_reason():
     result = check_rules("https://www.amazongames.com/")
     assert 0 < result["score"] < check_isPhishing.THRESHOLD
