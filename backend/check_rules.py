@@ -10,7 +10,7 @@ import csv
 import ipaddress
 from urllib.parse import urlparse
 
-from ml.extract_features import EXTRACTOR, normalize_url, TRIGGERS, SUSPICIOUS_TLDS
+from ml.extract_features import EXTRACTOR, normalize_url, TRIGGERS, SUSPICIOUS_TLDS, PLATFORMS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -125,14 +125,15 @@ def check_rules(url: str) -> dict:
     # 2. Назва бренду в домені, який бренду не належить
     brand = _find_brand(hostname)
     if brand and ext.domain.lower() != brand and suffix != brand:
-        # бренд у піддомені чужого сайту: "paypal.com.evil.ru"
-        brand_in_subdomain = brand in ext.subdomain.lower()
+        # бренд у піддомені чужого сайту: "paypal.com.evil.ru". На хостингах піддомен - ім'я
+        # акаунта (microsoft.github.io - офіційна сторінка), тому там потрібне ще й слово-тригер
+        brand_in_subdomain = brand in ext.subdomain.lower() and registered not in PLATFORMS
         if brand_in_subdomain or host_triggers or bad_tld:
             status["reasons"].append(f"назва бренду '{brand}' на чужому домені {registered}")
             status["score"] = max(status["score"], 0.9)
         else:
             # "amazongames.com", "microsoftazure.us" - може бути як фішинг, так і звичайний сайт
-            status["reasons"].append(f"домен {registered} містить назву бренду '{brand}'")
+            status["reasons"].append(f"домен {hostname} містить назву бренду '{brand}'")
             status["score"] = max(status["score"], INFO_SCORE)
 
     # 3. Підозріла доменна зона + слово-тригер у домені (login, verify, account...)

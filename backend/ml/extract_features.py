@@ -36,6 +36,14 @@ SHORTENERS = {
     "flowcode.com", "qr-codes.io"
 }
 
+# Спільні хостинги: піддомен - це ім'я користувача (microsoft.github.io, paypal-login.web.app)
+PLATFORMS = {
+    "github.io", "gitlab.io", "vercel.app", "netlify.app", "pages.dev", "workers.dev",
+    "web.app", "firebaseapp.com", "herokuapp.com", "onrender.com", "replit.app", "glitch.me",
+    "gitbook.io", "readthedocs.io", "weebly.com", "weeblysite.com", "wixsite.com",
+    "blogspot.com", "framer.app", "webflow.io", "trycloudflare.com"
+}
+
 EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=None)
 
 
