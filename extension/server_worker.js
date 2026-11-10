@@ -59,7 +59,7 @@ async function saveToCache(url, data) {
 
 
 async function sendUrlToBackend(url) {
-  if (!url || url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:") || url.startsWith("chrome-extension://")) {
+  if (!url || url.startsWith("chrome://") || url.startsWith("edge://") || url.startsWith("about:") || url.startsWith("chrome-extension://") || url.startsWith("moz-extension://")) {
     return null;
   }
   if (isSafeDomain(url)) {
