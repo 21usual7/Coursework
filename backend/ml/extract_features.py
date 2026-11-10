@@ -32,7 +32,8 @@ BRAND_KEYWORDS = {
 SHORTENERS = {
     "bit.ly", "tinyurl.com", "t.co", "is.gd", "t.ly",
     "tiny.cc", "ow.ly", "buff.ly", "cutt.ly", "rb.gy",
-    "rebrand.ly", "short.io", "lnkd.in", "soo.gd"
+    "rebrand.ly", "short.io", "lnkd.in", "soo.gd",
+    "flowcode.com", "qr-codes.io"
 }
 
 EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=None)
