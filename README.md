@@ -36,6 +36,7 @@ backend/
     extract_features.py       нормалізація URL і 47 ознак
     train_GUARD.py            навчання моделі
     augment_benign.py         генерація benign-URL зі списку популярних сайтів Tranco
+    draw_charts.py            графіки за training_metrics.txt -> ml/charts/
     coursework.pkl            навчена модель
     malicious_phish_cleaned.csv   датасет (642 861 URL, 4 класи)
     tranco_benign.csv         47 880 benign-URL популярних сайтів
@@ -122,6 +123,8 @@ cd backend
 python ml/augment_benign.py шлях/до/top-1m.csv   # -> ml/tranco_benign.csv
 # 2. Навчання (~2 хв)
 python ml/train_GUARD.py                          # -> ml/coursework.pkl, training_metrics.txt
+# 3. Графіки (потрібен matplotlib, лише локально)
+python ml/draw_charts.py                          # -> ml/charts/*.png
 ```
 
 ## Результати
