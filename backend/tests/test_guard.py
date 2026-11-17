@@ -137,6 +137,31 @@ def test_short_link_to_phishing_is_blocked(monkeypatch):
     assert result["reasons"][0] == "перенаправляє на paypal-login-verify.xyz"
 
 
+@pytest.mark.parametrize("original, final_url", [
+    ("https://example.com/start", "https://example.com/danger"),
+    ("https://first.github.io/", "https://second.github.io/danger"),
+])
+def test_redirect_target_checked_within_same_domain(monkeypatch, original, final_url):
+    import numpy as np
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(check_isPhishing, "model", SimpleNamespace(
+        classes_=np.array(["benign", "phishing"]),
+        predict_proba=lambda features: np.array([[0.6, 0.4]]),
+    ))
+    monkeypatch.setattr(check_isPhishing, "check_rules",
+                        lambda url: {"score": 0.4, "reasons": []})
+    monkeypatch.setattr(check_isPhishing, "check_redirects",
+                        lambda url: {"final_url": final_url, "redirect_count": 1, "error": None})
+    checked = []
+    monkeypatch.setattr(check_isPhishing, "check_google_safe_browsing",
+                        lambda url: checked.append(url) or url == final_url)
+
+    result = check_isPhishing.check_url(original)
+    assert result["is_phishing"] is True
+    assert final_url in checked
+
+
 # --- API ---
 
 def test_api_missing_url():
@@ -150,13 +175,26 @@ def test_api_invalid_url(body):
     assert response.status_code == 400
 
 
+@pytest.mark.parametrize("url", [
+    "   ", "http://[broken.com/a", "https://", "ftp://example.com/",
+    "http://example.com:bad/", "http://example.com:99999/", "https://example.com/a\nb",
+])
+def test_api_malformed_url(url):
+    response = app.test_client().post("/guardai/api/scan", json={"url": url})
+    assert response.status_code == 400
+
+
 def test_api_body_too_large():
     response = app.test_client().post("/guardai/api/scan", json={"url": "a" * 20000})
     assert response.status_code == 413
 
 
-def test_api_scan():
-    response = app.test_client().post("/guardai/api/scan", json={"url": "https://www.bbc.com/news"})
+@pytest.mark.parametrize("url", [
+    "https://www.bbc.com/news", "bbc.com/news", "HTTPS://www.bbc.com/news",
+    "bbc.com/news?next=https://example.com/",
+])
+def test_api_scan(url):
+    response = app.test_client().post("/guardai/api/scan", json={"url": url})
     data = response.get_json()
     assert response.status_code == 200
     assert set(data) == {"status", "url", "is_phishing", "probability", "threat_type", "reasons"}

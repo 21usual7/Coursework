@@ -52,14 +52,14 @@ def check_url(url, follow_redirects=True):
     reasons = rules["reasons"]
 
     # Мережева перевірка (повільна, до кількох секунд) - лише для коротких посилань
-    # і "сірої зони". Якщо посилання веде на інший домен, перевіряємо кінцеву адресу
+    # і "сірої зони". Якщо посилання веде на іншу адресу, перевіряємо її
     # тією ж моделлю й правилами і беремо більшу оцінку
     domain = EXTRACTOR(url).top_domain_under_public_suffix
     if follow_redirects and (domain in SHORTENERS or GRAY_ZONE <= phishing_prob < THRESHOLD):
         final_url = check_redirects(url)["final_url"]
         final_domain = EXTRACTOR(final_url).top_domain_under_public_suffix
 
-        if final_domain and final_domain != domain:
+        if final_domain and final_url != url:
             final = check_url(final_url, follow_redirects=False)
             if final["probability"] > phishing_prob:
                 phishing_prob = final["probability"]

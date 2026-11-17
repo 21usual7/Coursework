@@ -2,8 +2,10 @@ from flask import Flask, jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
+from urllib.parse import urlsplit
 from check_isPhishing import check_url
 import os
+import re
 
 '''Сервер, що приймає й оброблює запити від server_worker, дістає з них URL-посилання, викликає функцію, що запускає модель та повертає відповідь'''
 
@@ -37,7 +39,21 @@ def api_scan():
     if not isinstance(data, dict) or not isinstance(data.get("url"), str) or not 0 < len(data["url"]) <= 2048:
         return jsonify({"status": "error", "message": "Missing or invalid 'url' in request body"}), 400
 
-    url = data["url"]
+    url = data["url"].strip()
+    try:
+        parsed = urlsplit(url if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", url) else "http://" + url)
+        valid_url = (
+            bool(url)
+            and not any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in url)
+            and parsed.scheme in ("http", "https")
+            and bool(parsed.hostname)
+        )
+        # Доступ до port також перевіряє його формат і діапазон.
+        parsed.port
+    except ValueError:
+        valid_url = False
+    if not valid_url:
+        return jsonify({"status": "error", "message": "Missing or invalid 'url' in request body"}), 400
 
     try:
         result = check_url(url)
