@@ -99,8 +99,15 @@ docs/                         скриншоти для README
 
 **Firefox (128+):**
 
-1. Відкрити `about:debugging#/runtime/this-firefox`
-2. «Тимчасово завантажити додаток» → вибрати `extension/manifest.json`
+1. Зробити окрему копію папки `extension/`, наприклад `extension-firefox/`.
+2. У копії замінити `manifest.json` файлом `manifest.firefox.json`
+   (скопіювати його вміст у `manifest.json`).
+3. Відкрити `about:debugging#/runtime/this-firefox`.
+4. «Тимчасово завантажити додаток» → вибрати `manifest.json` з копії.
+
+Основний `manifest.json` призначений для Chrome: Manifest V3 використовує
+`background.service_worker`. Варіант Firefox використовує `background.scripts`.
+Поєднання цих ключів може спричинити помилку встановлення в Chrome.
 
 Тимчасовий додаток зникає після перезапуску Firefox; для постійного встановлення
 його треба підписати на addons.mozilla.org.
